@@ -1,0 +1,10 @@
+{
+  "name": "Tree of Knowledge",
+  "short_name": "TreeOfKnowledge",
+  "description": "Philosophie als lebendiges Universum",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#000005",
+  "theme_color": "#00AAFF",
+  "icons": []
+}

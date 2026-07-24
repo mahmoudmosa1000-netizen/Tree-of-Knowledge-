@@ -1,0 +1,36 @@
+{
+  "name": "tree-of-knowledge",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "db:push": "prisma db push",
+    "db:seed": "ts-node --compiler-options '{\"module\":\"CommonJS\"}' prisma/seed.ts",
+    "db:studio": "prisma studio",
+    "scrape:wikidata": "ts-node scripts/scrape-wikidata.ts",
+    "detect:influences": "ts-node scripts/detect-influences.ts"
+  },
+  "dependencies": {
+    "@prisma/client": "^5.19.1",
+    "d3": "^7.9.0",
+    "next": "14.2.32",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "zustand": "^4.5.4"
+  },
+  "devDependencies": {
+    "@types/d3": "^7.4.3",
+    "@types/node": "^20.14.15",
+    "@types/react": "^18.3.3",
+    "@types/react-dom": "^18.3.0",
+    "autoprefixer": "^10.4.19",
+    "postcss": "^8.4.41",
+    "prisma": "^5.19.1",
+    "tailwindcss": "^3.4.9",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.5.4"
+  }
+}

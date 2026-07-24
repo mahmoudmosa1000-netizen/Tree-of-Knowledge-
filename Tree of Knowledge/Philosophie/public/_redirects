@@ -1,0 +1,4 @@
+# Teilbare Links auf die Standalone-App zurückführen
+# (Hash-Fragmente wie #philosopher=kant werden clientseitig verarbeitet)
+/philosopher/*  /index.html  200
+/*              /index.html  200

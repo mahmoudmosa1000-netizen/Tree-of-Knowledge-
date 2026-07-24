@@ -1,0 +1,71 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Philosopher {
+  id        String   @id
+  name      String
+  shortName String
+  life      String
+  era       String
+  birthYear Int
+  x         Float
+  y         Float
+  color     String
+  quote     String
+  bio       String
+  bioEn     String?
+  ideas     String[]
+  works     String[]
+  wiki      String?
+
+  influencedBy Influence[] @relation("Influenced")
+  influences   Influence[] @relation("Influencer")
+
+  progress  UserProgress[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Influence {
+  id            String @id @default(cuid())
+
+  fromId        String
+  from          Philosopher @relation("Influencer", fields: [fromId], references: [id], onDelete: Cascade)
+
+  toId          String
+  to            Philosopher @relation("Influenced", fields: [toId], references: [id], onDelete: Cascade)
+
+  @@unique([fromId, toId])
+}
+
+model User {
+  id        String   @id @default(cuid())
+  name      String?
+  email     String?  @unique
+  createdAt DateTime @default(now())
+
+  progress  UserProgress[]
+}
+
+model UserProgress {
+  id            String   @id @default(cuid())
+
+  userId        String
+  user          User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  philosopherId String
+  philosopher   Philosopher @relation(fields: [philosopherId], references: [id], onDelete: Cascade)
+
+  learned       Boolean  @default(false)
+  quizScore     Int      @default(0)
+  updatedAt     DateTime @updatedAt
+
+  @@unique([userId, philosopherId])
+}
