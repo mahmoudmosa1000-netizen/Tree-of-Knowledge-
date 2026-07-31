@@ -21,9 +21,21 @@ export interface Influence {
   toId: string;
 }
 
-export type ViewMode = "tree" | "mindmap" | "timeline" | "galaxy" | "quiz";
+export type ViewMode = "tree" | "mindmap" | "timeline" | "galaxy" | "quiz" | "schools";
 
 export type Language = "de" | "en" | "ar";
+
+export type SchoolCategory = "philosophisch" | "wirtschaftlich" | "politisch" | "religiös";
+
+export interface School {
+  id: string;
+  name: string;
+  parent: string | null;
+  founders: string[];
+  year: number;
+  category: SchoolCategory;
+  desc: string;
+}
 
 export interface QuizQuestion {
   id: string;

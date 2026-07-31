@@ -10,6 +10,7 @@ import TreeSVG from "@/components/Tree/TreeSVG";
 import MindMapView from "@/components/Views/MindMapView";
 import TimelineView from "@/components/Views/TimelineView";
 import QuizView from "@/components/Views/QuizView";
+import SchoolsView from "@/components/Views/SchoolsView";
 import { useTreeStore } from "@/stores/treeStore";
 import type { Philosopher, ViewMode } from "@/types";
 
@@ -51,6 +52,7 @@ export default function Page() {
         l: "timeline",
         g: "galaxy",
         q: "quiz",
+        s: "schools",
       };
       const key = e.key.toLowerCase();
       if (map[key]) setView(map[key]);
@@ -105,6 +107,7 @@ export default function Page() {
           {view === "timeline" && <TimelineView philosophers={philosophers} />}
           {view === "galaxy" && <MindMapView philosophers={philosophers} />}
           {view === "quiz" && <QuizView philosophers={philosophers} />}
+          {view === "schools" && <SchoolsView philosophers={philosophers} />}
         </div>
       </div>
 

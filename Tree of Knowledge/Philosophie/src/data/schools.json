@@ -1,0 +1,17 @@
+[
+  {"id":"antike-ethik","name":"Antike Ethik","parent":null,"founders":["sokrates","platon","aristoteles"],"year":-400,"category":"philosophisch","desc":"Grundlage der westlichen Philosophie: Fragen nach dem guten Leben, Tugend und sicherem Wissen."},
+  {"id":"scholastik","name":"Scholastik","parent":"antike-ethik","founders":["augustinus","thomas"],"year":1250,"category":"religiös","desc":"Verband christlichen Glauben mit aristotelischer Logik im europäischen Mittelalter."},
+  {"id":"falsafa","name":"Falsafa","parent":"antike-ethik","founders":["ibnSina","ibnrushd"],"year":1000,"category":"religiös","desc":"Bewahrte und erweiterte antikes Wissen in der islamischen Welt und vermittelte es später nach Europa."},
+  {"id":"rationalismus","name":"Rationalismus","parent":null,"founders":["descartes","spinoza","leibniz"],"year":1640,"category":"philosophisch","desc":"Vernunft statt Sinneserfahrung gilt als Quelle sicheren Wissens."},
+  {"id":"phaenomenologie","name":"Phänomenologie","parent":"rationalismus","founders":["husserl"],"year":1900,"category":"philosophisch","desc":"Untersucht Bewusstseinserlebnisse 'an sich', bevor Theorien darüber gebildet werden."},
+  {"id":"aufklaerung","name":"Aufklärung","parent":"rationalismus","founders":["voltaire","rousseau","kant"],"year":1750,"category":"politisch","desc":"Vernunft, Kritik an Autorität und Tradition, Ideal der Selbstbestimmung des Menschen."},
+  {"id":"idealismus","name":"Deutscher Idealismus","parent":"aufklaerung","founders":["kant","hegel"],"year":1790,"category":"philosophisch","desc":"Die Wirklichkeit wird durch den denkenden Geist bzw. das Bewusstsein strukturiert."},
+  {"id":"marxismus","name":"Marxismus","parent":"idealismus","founders":["marx"],"year":1848,"category":"wirtschaftlich","desc":"Historischer Materialismus: nicht Ideen, sondern wirtschaftliche Verhältnisse und Klassenkampf treiben die Geschichte."},
+  {"id":"raetekommunismus","name":"Rätekommunismus","parent":"marxismus","founders":["luxemburg"],"year":1913,"category":"politisch","desc":"Betont spontane Massenbewegungen statt Parteidiktatur als Weg zum Sozialismus."},
+  {"id":"trotzkismus","name":"Trotzkismus","parent":"marxismus","founders":["trotzki"],"year":1930,"category":"politisch","desc":"Fordert permanente, weltweite Revolution statt 'Sozialismus in einem Land'."},
+  {"id":"existenzialismus","name":"Existenzialismus","parent":"idealismus","founders":["kierkegaard"],"year":1843,"category":"philosophisch","desc":"Die Existenz des Einzelnen geht jeder abstrakten Idee voraus – radikale Freiheit und Verantwortung."},
+  {"id":"atheist-existenzialismus","name":"Atheistischer Existenzialismus","parent":"existenzialismus","founders":["sartre","camus","beauvoir"],"year":1943,"category":"philosophisch","desc":"Ohne Gott ist der Mensch 'zur Freiheit verdammt' und muss sich selbst durch Taten definieren."},
+  {"id":"empirismus","name":"Empirismus","parent":null,"founders":["locke","hume"],"year":1690,"category":"philosophisch","desc":"Alles Wissen entspringt der Erfahrung, nicht angeborenen Ideen."},
+  {"id":"liberalismus","name":"Liberalismus","parent":"empirismus","founders":["locke"],"year":1689,"category":"wirtschaftlich","desc":"Individuelle Freiheit, Eigentum und begrenzte Staatsmacht als politische und wirtschaftliche Grundwerte."},
+  {"id":"soziologie","name":"Verstehende Soziologie","parent":"empirismus","founders":["weber"],"year":1904,"category":"wirtschaftlich","desc":"Erklärt gesellschaftliches Handeln durch das Verstehen des subjektiven Sinns, den Menschen ihm geben."}
+]

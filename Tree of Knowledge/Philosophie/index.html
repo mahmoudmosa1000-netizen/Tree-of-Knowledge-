@@ -639,6 +639,33 @@ canvas{display:block;position:fixed;inset:0}
   padding:7px 13px;cursor:pointer;font-family:monospace;z-index:270}
 #kg-recompute:hover{color:#96CDFF;border-color:#96CDFF}
 
+#sc-overlay{position:fixed;inset:0;background:rgba(0,2,10,.95);backdrop-filter:blur(10px);
+  z-index:260;opacity:0;pointer-events:none;transition:opacity .35s}
+#sc-overlay.show{opacity:1;pointer-events:auto}
+#sc-svg{position:absolute;inset:0;width:100%;height:100%}
+#sc-node{cursor:pointer}
+.sc-node-box{transition:filter .18s}
+.sc-node-box:hover{filter:brightness(1.3)}
+.sc-node-box.active{filter:brightness(1.4)}
+#sc-panel{position:fixed;bottom:0;left:0;right:0;background:rgba(6,10,20,.97);
+  border-top:1px solid rgba(150,205,255,.25);backdrop-filter:blur(20px);
+  padding:20px 26px;max-height:38vh;overflow-y:auto;transform:translateY(100%);
+  transition:transform .35s cubic-bezier(.34,1.56,.64,1);z-index:280}
+#sc-panel.show{transform:translateY(0)}
+#sc-panel .scp-cat{font-size:10px;letter-spacing:2.5px;text-transform:uppercase;font-family:monospace;margin-bottom:6px}
+#sc-panel .scp-name{font-family:'Fraunces',Georgia,serif;font-style:italic;font-size:22px;color:#DCE9FF;margin-bottom:8px}
+#sc-panel .scp-desc{font-size:13.5px;color:#9FC3E8;line-height:1.65;max-width:640px;margin-bottom:12px}
+#sc-panel .scp-founders{display:flex;flex-wrap:wrap;gap:8px}
+.scp-founder{font-size:11px;font-family:monospace;padding:5px 12px;border-radius:16px;
+  cursor:pointer;transition:background .15s;display:flex;align-items:center;gap:6px}
+.scp-founder:hover{background:rgba(150,205,255,.14)}
+.scp-founder .sfd{width:6px;height:6px;border-radius:50%}
+#sc-legend{position:fixed;bottom:20px;right:20px;background:rgba(4,10,22,.85);
+  border:1px solid rgba(255,255,255,.08);border-radius:10px;padding:11px 14px;
+  font-size:10.5px;font-family:monospace;z-index:270;display:flex;flex-direction:column;gap:5px}
+.sl-item{display:flex;align-items:center;gap:7px;color:#9FC3E8}
+.sl-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+
 /* Konsolidierte Close-Buttons — vorher 6 fast identische Einzelregeln ohne Transition */
 #quiz-close,#mm-close,#gx-close,#fc-close,#geo-close,#kg-close{
   position:absolute;top:58px;right:20px;width:34px;height:34px;line-height:1;
@@ -694,7 +721,7 @@ canvas{display:block;position:fixed;inset:0}
 <body>
 <div class="noise-layer" aria-hidden="true"></div>
 <p class="sr-only">
-  Tree of Knowledge zeigt 35 Philosophen als interaktive 3D-Visualisierung. Diese Darstellung ist
+  Tree of Knowledge zeigt 38 Philosophen als interaktive 3D-Visualisierung. Diese Darstellung ist
   primär visuell. Nutze das Suchfeld oben (durchsucht Name, Epoche und Ideen) oder die
   Schnellzugriff-Punkte am linken Bildschirmrand, um einzelne Philosophen direkt und tastaturbedienbar
   zu erreichen — beide öffnen die Detailansicht mit vollständigem Text zu Biografie, Zitat und Werken.
@@ -716,6 +743,7 @@ canvas{display:block;position:fixed;inset:0}
     <div id="search-results"></div>
   </div>
   <div id="header-tools">
+    <button class="hbtn" id="kg-btn" onclick="openKnowledgeGraph()">🧠 <span class="lbl">Wissensgraph</span></button>
     <button class="hbtn" id="geo-btn" onclick="openGeoMap()">🗺 <span class="lbl">Karte</span></button>
     <button class="hbtn" id="fc-btn" onclick="openFlashcards()">🎓 <span class="lbl">Lernkarten</span></button>
     <button class="hbtn" id="gx-btn" onclick="openGalaxy()">🌌 <span class="lbl">Galaxy</span></button>
@@ -729,6 +757,8 @@ canvas{display:block;position:fixed;inset:0}
   <div id="footer-left">
     <button class="hbtn" id="tl-toggle" onclick="toggleTimeline()">⏱ <span class="lbl">Zeitleiste</span></button>
     <button class="hbtn" id="cmp-toggle" onclick="openCompare()">⚖ <span class="lbl">Vergleich</span></button>
+    <button class="hbtn" onclick="discoverRandom()" title="Zufälligen Philosophen entdecken (R)">🎲 <span class="lbl">Zufall</span></button>
+    <button class="hbtn" onclick="openSchools()" title="Stammbaum der Denkrichtungen">🌿 <span class="lbl">Schulen</span></button>
   </div>
 
   </footer>
@@ -849,7 +879,7 @@ canvas{display:block;position:fixed;inset:0}
 <!-- ══════════════ KNOWLEDGE GALAXY OVERLAY (unabhängig vom 3D-Baum) ══════════════ -->
 <div id="gx-overlay">
   <button id="gx-close" onclick="closeGalaxy()" title="Galaxy schließen (ESC)">✕</button>
-  <div id="gx-title">WISSENS-GALAXIE · 35 PHILOSOPHEN NACH EPOCHE GECLUSTERT</div>
+  <div id="gx-title">WISSENS-GALAXIE · 38 PHILOSOPHEN NACH EPOCHE GECLUSTERT</div>
   <input id="gx-search" type="text" placeholder="⌕ Philosoph suchen…" autocomplete="off"/>
   <svg id="gx-svg"></svg>
   <div id="gx-tooltip"></div>
@@ -894,7 +924,7 @@ canvas{display:block;position:fixed;inset:0}
 <!-- ══════════════ GEO-KARTE OVERLAY (unabhängig vom 3D-Baum) ══════════════ -->
 <div id="geo-overlay">
   <button id="geo-close" onclick="closeGeoMap()" title="Karte schließen (ESC)">✕</button>
-  <div id="geo-title">WIRKUNGSORTE · 35 PHILOSOPHEN AUF DER WELTKARTE</div>
+  <div id="geo-title">WIRKUNGSORTE · 38 PHILOSOPHEN AUF DER WELTKARTE</div>
   <div id="geo-map"></div>
   <div id="geo-legend"></div>
   <div id="geo-hint">Ziehen zum Verschieben<br/>Scrollen zum Zoomen</div>
@@ -921,6 +951,20 @@ canvas{display:block;position:fixed;inset:0}
     <b>◆</b> Via lokales Ollama-Embedding-Modell
   </div>
   <button id="kg-recompute" style="display:none" onclick="kgReset()">↻ Neu berechnen</button>
+</div>
+
+<!-- ══════════════ SCHULEN-STAMMBAUM OVERLAY (unabhängig vom 3D-Baum) ══════════════ -->
+<div id="sc-overlay">
+  <button id="sc-close" onclick="closeSchools()" title="Schließen (ESC)">✕</button>
+  <div id="sc-title">STAMMBAUM DER SCHULEN · IDEEN, STRÖMUNGEN, ABSPALTUNGEN</div>
+  <svg id="sc-svg"></svg>
+  <div id="sc-panel"></div>
+  <div id="sc-legend">
+    <div class="sl-item"><span class="sl-dot" style="background:#96CDFF"></span>philosophisch</div>
+    <div class="sl-item"><span class="sl-dot" style="background:#FFBE78"></span>wirtschaftlich</div>
+    <div class="sl-item"><span class="sl-dot" style="background:#7BAE6E"></span>politisch</div>
+    <div class="sl-item"><span class="sl-dot" style="background:#E879F9"></span>religiös</div>
+  </div>
 </div>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -961,81 +1005,1040 @@ canvas{display:block;position:fixed;inset:0}
 
 // ─── Philosoph-Daten ───────────────────────────────────────────────────────
 const PH=[
-  {id:"sokrates",by:-469,name:"Sokrates",s:"Sokrates",life:"469–399 v.Chr.",era:"Antike",x:593,y:35,c:"#F59E0B",ideas:["Mäeutik","Selbsterkenntnis","Dialog","Tugendethik"],quote:"Ich weiß, dass ich nichts weiß.",inf:["platon"],bio:"Sokrates hinterließ keine Schriften – sein Denken lebt durch Platon. Seine Methode des systematischen Fragens legte den Grundstein der westlichen Philosophie.",bio_en:"Socrates left no writings — his thought lives through Plato.",works:["Keine eigenen Schriften (überliefert durch Platon)"]},
-  {id:"platon",by:-428,name:"Platon",s:"Platon",life:"428–348 v.Chr.",era:"Antike",x:555,y:60,c:"#F59E0B",ideas:["Ideenlehre","Höhlengleichnis","Politeia","Akademie"],quote:"Das Staunen ist der Anfang der Weisheit.",inf:["aristoteles","augustinus"],bio:"Platon gründete die Akademie – die erste Universität Europas. Die westliche Philosophie ist eine Reihe von Fußnoten zu Platon.",bio_en:"Plato founded the Academy — Europe's first university.",works:["Politeia (~375 v.Chr.)","Symposion (~385 v.Chr.)","Phaidon (~385 v.Chr.)"]},
-  {id:"aristoteles",by:-384,name:"Aristoteles",s:"Aristoteles",life:"384–322 v.Chr.",era:"Antike",x:625,y:55,c:"#F59E0B",ideas:["Logik","Eudaimonia","Metaphysik","Empirismus"],quote:"Das Ziel des Menschen ist die Glückseligkeit.",inf:["thomas","ibnrushd","ibnSina"],bio:"Aristoteles schuf das erste systematische Wissenssystem der Menschheit – von Logik über Biologie bis Ethik.",bio_en:"Aristotle created the first systematic body of knowledge.",works:["Nikomachische Ethik (~340 v.Chr.)","Metaphysik (~350 v.Chr.)","Politik (~335 v.Chr.)"]},
-  {id:"augustinus",by:354,name:"Augustinus",s:"Augustinus",life:"354–430 n.Chr.",era:"Mittelalter",x:500,y:75,c:"#60A5FA",ideas:["Gotteslehre","Erbsünde","Confessiones","Gnade"],quote:"Unruhig ist unser Herz, bis es Ruhe findet in dir.",inf:["thomas"],bio:"Augustinus verband Platons Philosophie mit dem christlichen Glauben. Seine Confessiones sind das erste psychologische Selbstporträt der Weltliteratur.",bio_en:"Augustine united Platonic philosophy with Christian faith.",works:["Confessiones (397–400)","De Civitate Dei (413–426)"]},
-  {id:"thomas",by:1225,name:"Thomas v. Aquin",s:"Thomas",life:"1225–1274",era:"Mittelalter",x:670,y:80,c:"#60A5FA",ideas:["Gottesbeweis","Scholastik","Naturrecht","Vernunft & Glaube"],quote:"Die Liebe trägt den Menschen über sich selbst hinaus.",inf:["descartes"],bio:"Thomas synthetisierte Aristoteles und christliche Theologie zur Scholastik. Die Summa Theologica ist das umfassendste System des Mittelalters.",bio_en:"Thomas synthesized Aristotle and Christian theology into Scholasticism.",works:["Summa Theologica (1265–1274)","Summa contra Gentiles (1259–1265)"]},
-  {id:"ibnrushd",by:1126,name:"Ibn Rushd",s:"Ibn Rushd",life:"1126–1198",era:"Islamische Phil.",x:430,y:100,c:"#60A5FA",ideas:["Averroismus","Aristoteles","Vernunft & Glaube","Ewigkeit"],quote:"Wissen ist das edelste Gut — es wächst, wenn man es teilt.",inf:["thomas"],bio:"Ibn Rushd (Averroes) rettete das aristotelische Denken für Europa. Seine Kommentare beeinflussten Thomas von Aquin grundlegend.",bio_en:"Ibn Rushd (Averroes) rescued Aristotelian thought for Europe.",works:["Tahafut al-Tahafut (1180)","Kommentare zu Aristoteles (1169–1195)"]},
-  {id:"descartes",by:1596,name:"René Descartes",s:"Descartes",life:"1596–1650",era:"Neuzeit",x:740,y:110,c:"#A78BFA",ideas:["Cogito ergo sum","Methodischer Zweifel","Dualismus","Rationalismus"],quote:"Ich denke, also bin ich.",inf:["kant","leibniz"],bio:"Descartes begründete die neuzeitliche Philosophie durch radikalen Zweifel. Sein Cogito ist der bekannteste Satz der Philosophiegeschichte.",bio_en:"Descartes founded modern philosophy through radical doubt.",works:["Meditationes de prima philosophia (1641)","Discours de la méthode (1637)"]},
-  {id:"spinoza",by:1632,name:"Baruch Spinoza",s:"Spinoza",life:"1632–1677",era:"Rationalismus",x:380,y:140,c:"#A78BFA",ideas:["Deus sive Natura","Pantheismus","Ethica","Determinismus"],quote:"Der freie Mensch denkt an nichts weniger als an den Tod.",inf:["kant","hegel"],bio:"Spinoza identifizierte Gott mit der Natur selbst. Seine Ethik beweist die Realität wie ein Mathematiker.",bio_en:"Spinoza identified God with Nature itself.",works:["Ethica (1677, posthum)","Tractatus Theologico-Politicus (1670)"]},
-  {id:"locke",by:1632,name:"John Locke",s:"Locke",life:"1632–1704",era:"Aufklärung",x:790,y:150,c:"#96CDFF",ideas:["Tabula Rasa","Empirismus","Naturrechte","Sozialvertrag"],quote:"Der Verstand ist ein unbeschriebenes Blatt.",inf:["kant","rousseau","hume","voltaire"],bio:"Locke begründete den modernen Empirismus und die Theorie der Naturrechte. Sein Einfluss auf die US-Verfassung ist direkt.",bio_en:"Locke founded modern empiricism and natural rights theory.",works:["Two Treatises of Government (1689)","An Essay Concerning Human Understanding (1689)"]},
-  {id:"rousseau",by:1712,name:"J.-J. Rousseau",s:"Rousseau",life:"1712–1778",era:"Aufklärung",x:330,y:165,c:"#96CDFF",ideas:["Gesellschaftsvertrag","Naturzustand","Allgemeiner Wille","Émile"],quote:"Der Mensch ist von Natur aus gut.",inf:["kant","marx"],bio:"Rousseaus Gesellschaftsvertrag: Der Mensch ist gut – die Zivilisation verdirbt ihn. Seine Ideen entfachten die Französische Revolution.",bio_en:"Rousseau's Social Contract: humans are naturally good.",works:["Du contrat social (1762)","Émile ou De l'éducation (1762)"]},
-  {id:"kant",by:1724,name:"Immanuel Kant",s:"Kant",life:"1724–1804",era:"Aufklärung",x:840,y:170,c:"#96CDFF",ideas:["Kategorischer Imperativ","Kritik d. Vernunft","Pflichtethik","Autonomie"],quote:"Habe Mut, dich deines eigenen Verstandes zu bedienen.",inf:["hegel","schopenhauer","rawls"],bio:"Kant vollzog die Kopernikanische Wende der Philosophie. Sein kategorischer Imperativ ist die tiefste Begründung von Würde und Moral.",bio_en:"Kant performed the Copernican revolution in philosophy.",works:["Kritik der reinen Vernunft (1781)","Kritik der praktischen Vernunft (1788)","Grundlegung zur Metaphysik der Sitten (1785)"]},
-  {id:"hegel",by:1770,name:"Georg W.F. Hegel",s:"Hegel",life:"1770–1831",era:"Idealismus",x:290,y:190,c:"#96CDFF",ideas:["Dialektik","Weltgeist","Phänomenologie","Geschichtsphilosophie"],quote:"Das Wahre ist das Ganze.",inf:["nietzsche","marx"],bio:"Hegels Dialektik revolutionierte das Denken. These–Antithese–Synthese wurde zum Grundrhythmus westlichen Denkens.",bio_en:"Hegel's dialectic revolutionized thought.",works:["Phänomenologie des Geistes (1807)","Wissenschaft der Logik (1812–1816)"]},
-  {id:"schopenhauer",by:1788,name:"A. Schopenhauer",s:"Schopenhauer",life:"1788–1860",era:"Willensphil.",x:880,y:195,c:"#FFB95F",ideas:["Blinder Wille","Vorstellung","Pessimismus","Kunst & Erlösung"],quote:"Das Leben schwankt wie ein Pendel zwischen Schmerz und Langeweile.",inf:["nietzsche","wittgenstein"],bio:"Schopenhauer sah hinter aller Erscheinung einen blinden, ziellosen Willen. Sein Pessimismus und Buddhismus-Nähe machten ihn zum originellsten westlichen Denker.",bio_en:"Schopenhauer saw a blind Will behind all appearances.",works:["Die Welt als Wille und Vorstellung (1818)"]},
-  {id:"kierkegaard",by:1813,name:"S. Kierkegaard",s:"Kierkegaard",life:"1813–1855",era:"Existenzial.",x:250,y:230,c:"#F87171",ideas:["Angst","Entweder-Oder","Subjektivität","Glaube"],quote:"Das Leben muss rückwärts verstanden, vorwärts gelebt werden.",inf:["heidegger","sartre"],bio:"Kierkegaard, der Vater des Existenzialismus, betonte die radikale individuelle Wahl. Angst ist der Schwindel der Freiheit.",bio_en:"Kierkegaard emphasized radical individual choice.",works:["Entweder–Oder (1843)","Der Begriff Angst (1844)"]},
-  {id:"marx",by:1818,name:"Karl Marx",s:"Marx",life:"1818–1883",era:"Sozialphil.",x:920,y:230,c:"#FB923C",ideas:["Historischer Materialismus","Kapital","Klassenkampf","Entfremdung"],quote:"Die Philosophen haben die Welt nur verschieden interpretiert. Es kommt drauf an, sie zu verändern.",inf:["foucault"],bio:"Marx kehrte Hegels Idealismus um: Nicht Ideen, sondern materielle Verhältnisse treiben die Geschichte.",bio_en:"Marx inverted Hegel: material conditions drive history.",works:["Das Kapital (1867)","Das Kommunistische Manifest (1848, mit Engels)"]},
-  {id:"nietzsche",by:1844,name:"F. Nietzsche",s:"Nietzsche",life:"1844–1900",era:"Lebensphil.",x:620,y:200,c:"#F87171",ideas:["Übermensch","Wille zur Macht","Ewige Wiederkehr","Tod Gottes"],quote:"Was mich nicht umbringt, macht mich stärker.",inf:["heidegger","sartre","foucault"],bio:"Nietzsche philosophierte mit dem Hammer. Er hinterfragte alle moralischen Grundlagen der westlichen Welt.",bio_en:"Nietzsche philosophized with a hammer.",works:["Also sprach Zarathustra (1883–1885)","Jenseits von Gut und Böse (1886)","Zur Genealogie der Moral (1887)"]},
-  {id:"husserl",by:1859,name:"Edmund Husserl",s:"Husserl",life:"1859–1938",era:"Phänomeno.",x:560,y:230,c:"#F87171",ideas:["Phänomenologie","Epoché","Intentionalität","Lebenswelt"],quote:"Zu den Sachen selbst!",inf:["heidegger","sartre"],bio:"Husserl begründete die Phänomenologie – die Philosophie des reinen Bewusstseins.",bio_en:"Husserl founded phenomenology — the philosophy of pure consciousness.",works:["Logische Untersuchungen (1900–1901)","Ideen zu einer reinen Phänomenologie (1913)"]},
-  {id:"heidegger",by:1889,name:"M. Heidegger",s:"Heidegger",life:"1889–1976",era:"Existenzial.",x:680,y:220,c:"#F87171",ideas:["Sein und Zeit","Dasein","Geworfenheit","Sein-zum-Tode"],quote:"Die Sprache ist das Haus des Seins.",inf:["sartre","arendt"],bio:"Heidegger stellte die Grundfrage neu: Was bedeutet es überhaupt zu sein? Sein und Zeit ist das bedeutendste Werk des 20. Jahrhunderts.",bio_en:"Heidegger: Being and Time is the most important work of the 20th century.",works:["Sein und Zeit (1927)"]},
-  {id:"wittgenstein",by:1889,name:"L. Wittgenstein",s:"Wittgenstein",life:"1889–1951",era:"Analytisch",x:300,y:290,c:"#FB923C",ideas:["Sprachspiele","Tractatus","Logik","Bedeutung"],quote:"Worüber man nicht sprechen kann, darüber muss man schweigen.",inf:[],bio:"Wittgenstein revolutionierte die Sprachphilosophie zweimal – oft gegen seine eigene frühere Position.",bio_en:"Wittgenstein revolutionized philosophy of language twice.",works:["Tractatus Logico-Philosophicus (1921)","Philosophische Untersuchungen (1953, posthum)"]},
-  {id:"sartre",by:1905,name:"Jean-Paul Sartre",s:"Sartre",life:"1905–1980",era:"Existenzial.",x:900,y:290,c:"#F87171",ideas:["Existenz vor Essenz","Radikale Freiheit","Mauvaise foi","Engagement"],quote:"Wir sind verurteilt, frei zu sein.",inf:["arendt","beauvoir"],bio:"Sartre machte den Existenzialismus zur prägendsten Philosophie des 20. Jahrhunderts.",bio_en:"Sartre made existentialism the defining philosophy of the 20th century.",works:["L'Être et le Néant (1943)","L'existentialisme est un humanisme (1946)"]},
-  {id:"beauvoir",by:1908,name:"S. de Beauvoir",s:"Beauvoir",life:"1908–1986",era:"Feminismus",x:350,y:330,c:"#E879F9",ideas:["Das andere Geschlecht","Feminismus","Existenzialismus","Freiheit"],quote:"Man wird nicht als Frau geboren, man wird dazu gemacht.",inf:["arendt","wollstonecraft"],bio:"Beauvoirs Das andere Geschlecht begründete die feministische Philosophie.",bio_en:"Beauvoir's The Second Sex founded feminist philosophy.",works:["Le Deuxième Sexe (1949)"]},
-  {id:"konfuzius",by:-551,name:"Konfuzius",s:"Konfuzius",life:"551–479 v.Chr.",era:"Ostasien",x:850,y:330,c:"#FCD34D",ideas:["Ren","Li","Junzi","Zhengming"],quote:"Lernen ohne zu denken ist vergebliche Mühe.",inf:[],bio:"Konfuzius begründete den Konfuzianismus – die Ethik, die Ostasien für 2500 Jahre prägte.",bio_en:"Confucius founded Confucianism, shaping East Asia for 2500 years.",works:["Lunyu / Gespräche (postum von Schülern verfasst)"]},
-  {id:"arendt",by:1906,name:"Hannah Arendt",s:"Arendt",life:"1906–1975",era:"Zeitgenössisch",x:420,y:350,c:"#E879F9",ideas:["Vita Activa","Banalität des Bösen","Totalitarismus","Öffentlichkeit"],quote:"Denken wir, was wir tun.",inf:[],bio:"Arendt analysierte die Katastrophen des 20. Jahrhunderts mit philosophischer Schärfe.",bio_en:"Arendt analyzed the catastrophes of the 20th century with philosophical precision.",works:["The Origins of Totalitarianism (1951)","Eichmann in Jerusalem (1963)"]},
-  {id:"foucault",by:1926,name:"Michel Foucault",s:"Foucault",life:"1926–1984",era:"Postmoderne",x:780,y:350,c:"#E879F9",ideas:["Macht-Wissen","Diskursanalyse","Genealogie","Biopolitik"],quote:"Wo es Macht gibt, gibt es Widerstand.",inf:[],bio:"Foucault analysierte wie Macht und Wissen zusammenhängen. Geschichte ist immer Machtgeschichte.",bio_en:"Foucault analyzed how power and knowledge intertwine.",works:["Les Mots et les Choses (1966)","Surveiller et punir (1975)"]},
-  {id:"rawls",by:1921,name:"John Rawls",s:"Rawls",life:"1921–2002",era:"Zeitgenössisch",x:480,y:300,c:"#E879F9",ideas:["Schleier des Nichtwissens","Differenzprinzip","Fairness","Politischer Liberalismus"],quote:"Gerechtigkeit ist die erste Tugend sozialer Institutionen.",inf:[],bio:"Rawls' Theorie der Gerechtigkeit revolutionierte die politische Philosophie des 20. Jahrhunderts.",bio_en:"Rawls' Theory of Justice revolutionized 20th-century political philosophy.",works:["A Theory of Justice (1971)"]},
-  {id:"ibnSina",by:980,name:"Ibn Sina",s:"Ibn Sina",life:"980–1037",era:"Islamische Phil.",x:720,y:300,c:"#60A5FA",wiki:"Avicenna",
-   ideas:["Avicennismus","Seele & Körper","Medizin","Floating Man"],
-   quote:"Ich war und mein Sein kannte keine Ursache außer mir selbst.",inf:["ibnrushd"],
-   bio:"Ibn Sina (Avicenna) war der bedeutendste islamische Philosoph und Arzt des Mittelalters. Sein Kanon der Medizin war 600 Jahre lang das medizinische Standardwerk Europas.",
-   bio_en:"Ibn Sina was the greatest Islamic philosopher and physician of the Middle Ages. His Canon of Medicine was Europe's standard medical text for 600 years.",works:["Der Kanon der Medizin (1025)","Das Buch der Heilung (1027)"]},
-  {id:"leibniz",by:1646,name:"G.W. Leibniz",s:"Leibniz",life:"1646–1716",era:"Rationalismus",x:390,y:400,c:"#A78BFA",wiki:"Gottfried_Wilhelm_Leibniz",
-   ideas:["Monadologie","Theodizee","Differentialrechnung","Praestabilierte Harmonie"],
-   quote:"Diese Welt ist die beste aller möglichen Welten.",inf:["kant"],
-   bio:"Leibniz erfand unabhängig von Newton die Differentialrechnung und entwickelte die Monadenlehre. Der letzte universale Geist der Philosophiegeschichte.",
-   bio_en:"Leibniz independently invented calculus and developed the theory of monads. The last universal mind in the history of philosophy.",works:["Monadologie (1714)","Theodizee (1710)"]},
-  {id:"hume",by:1711,name:"David Hume",s:"Hume",life:"1711–1776",era:"Aufklärung",x:800,y:400,c:"#96CDFF",wiki:"David_Hume",
-   ideas:["Empirismus","Kausalität","Induktionsproblem","Bündel-Theorie"],
-   quote:"Vernunft ist und soll nur die Sklavin der Leidenschaften sein.",inf:["kant"],
-   bio:"Hume weckte Kant aus seinem dogmatischen Schlummer. Sein radikaler Empirismus revolutionierte die Erkenntnistheorie.",
-   bio_en:"Hume woke Kant from his dogmatic slumber. His radical empiricism revolutionized epistemology.",works:["A Treatise of Human Nature (1739)","Enquiry Concerning Human Understanding (1748)"]},
-  {id:"voltaire",by:1694,name:"Voltaire",s:"Voltaire",life:"1694–1778",era:"Aufklärung",x:450,y:420,c:"#96CDFF",wiki:"Voltaire",
-   ideas:["Toleranz","Religionskritik","Deismus","Candide"],
-   quote:"Ich stimme dir nicht zu, aber ich würde mein Leben dafür einsetzen, dass du es sagen darfst.",inf:["rousseau"],
-   bio:"Voltaire war die schärfste Zunge der Aufklärung — gegen Fanatismus und Tyrannei mit Witz und Ironie.",
-   bio_en:"Voltaire was the sharpest tongue of the Enlightenment — against fanaticism and tyranny with wit and irony.",works:["Candide (1759)","Lettres philosophiques (1734)"]},
-  {id:"bergson",by:1859,name:"Henri Bergson",s:"Bergson",life:"1859–1941",era:"Lebensphil.",x:740,y:420,c:"#F87171",wiki:"Henri_Bergson",
-   ideas:["Élan Vital","Dauer","Intuition","Gedächtnis"],
-   quote:"Die Zeit ist das, was verhindert, dass alles auf einmal geschieht.",inf:["sartre"],
-   bio:"Bergson stellte die lebendige Zeit (Durée) gegen die mechanische Uhrzeit. Sein Élan Vital beeinflusste Philosophie, Literatur und Biologie.",
-   bio_en:"Bergson opposed living time to mechanical clock time. His élan vital influenced philosophy, literature, and biology.",works:["Schöpferische Evolution (1907)","Zeit und Freiheit (1889)"]},
-  {id:"russell",by:1872,name:"Bertrand Russell",s:"Russell",life:"1872–1970",era:"Analytisch",x:540,y:130,c:"#FB923C",wiki:"Bertrand_Russell",
-   ideas:["Logizismus","Typentheorie","Atomismus","Deskriptionstheorie"],
-   quote:"Das Problem der modernen Welt ist, dass Dumme so sicher und Kluge so voller Zweifel sind.",inf:["wittgenstein"],
-   bio:"Russell begründete die analytische Philosophie und versuchte Mathematik auf Logik zu reduzieren. Auch bedeutender Pazifist.",
-   bio_en:"Russell co-founded analytic philosophy and attempted to reduce mathematics to logic. Also a significant pacifist.",works:["Principia Mathematica (1910–1913, mit Whitehead)","The Problems of Philosophy (1912)"]},
-  {id:"camus",by:1913,name:"Albert Camus",s:"Camus",life:"1913–1960",era:"Existenzial.",x:650,y:140,c:"#F87171",wiki:"Albert_Camus",
-   ideas:["Absurdismus","Sisyphos","Revolte","Solidarität"],
-   quote:"Man muss sich Sisyphus als glücklichen Menschen vorstellen.",inf:[],
-   bio:"Camus entwickelte den Absurdismus: Das Leben ist sinnlos, aber wir sollen trotzdem rebellieren. Nobelpreis 1957.",
-   bio_en:"Camus developed absurdism: life is meaningless, yet we must rebel and be solidary. Nobel Prize 1957.",works:["Le Mythe de Sisyphe (1942)","L'Étranger (1942)"]},
-  {id:"jaspers",by:1883,name:"Karl Jaspers",s:"Jaspers",life:"1883–1969",era:"Existenzial.",x:610,y:350,c:"#F87171",wiki:"Karl_Jaspers",
-   ideas:["Existenz","Grenzsituationen","Kommunikation","Transzendenz"],
-   quote:"Wir werden, was wir sind, durch die Sache, der wir uns widmen.",inf:[],
-   bio:"Jaspers sah Grenzsituationen (Tod, Schuld, Kampf) als Orte authentischer Existenz. Auch bedeutender Psychiatrie-Reformer.",
-   bio_en:"Jaspers saw limit situations as places of authentic existence. Also a significant psychiatric reformer.",works:["Psychologie der Weltanschauungen (1919)","Philosophie (1932)"]},
-  {id:"wollstonecraft",by:1759,name:"M. Wollstonecraft",s:"Wollstonecraft",life:"1759–1797",era:"Aufklärung",x:590,y:300,c:"#E879F9",wiki:"Mary_Wollstonecraft",
-   ideas:["Frauenrechte","Vernunft","Vindicación","Gleichheit"],
-   quote:"Ich möchte keine Macht über Männer, sondern über mich selbst.",inf:["beauvoir"],
-   bio:"Wollstonecraft schrieb die erste feministische Schrift: A Vindication of the Rights of Woman (1792), ein Jahrhundert vor der Frauenbewegung.",
-   bio_en:"Wollstonecraft wrote the first major feminist text (1792), a century before the women's movement.",works:["A Vindication of the Rights of Woman (1792)"]},
-  {id:"popper",by:1902,name:"Karl Popper",s:"Popper",life:"1902–1994",era:"Analytisch",x:520,y:260,c:"#FB923C",wiki:"Karl_Popper",
-   ideas:["Falsifizierbarkeit","Offene Gesellschaft","Kritischer Rationalismus","Drei-Welten"],
-   quote:"Wahre Unwissenheit ist nicht Mangel an Wissen, sondern Weigerung hinzuzulernen.",inf:[],
-   bio:"Popper revolutionierte die Wissenschaftstheorie mit dem Falsifizierungsprinzip. In der Offenen Gesellschaft griff er Platon und Marx als Feinde der Freiheit an.",
-   bio_en:"Popper revolutionized philosophy of science with falsifiability. In The Open Society he attacked Plato and Marx as enemies of freedom.",works:["Logik der Forschung (1934)","Die offene Gesellschaft und ihre Feinde (1945)"]}
+  {
+    "id": "sokrates",
+    "by": -469,
+    "name": "Sokrates",
+    "s": "Sokrates",
+    "life": "469–399 v.Chr.",
+    "era": "Antike",
+    "x": 593,
+    "y": 35,
+    "c": "#F59E0B",
+    "ideas": [
+      "Mäeutik",
+      "Selbsterkenntnis",
+      "Dialog",
+      "Tugendethik"
+    ],
+    "quote": "Ich weiß, dass ich nichts weiß.",
+    "inf": [
+      "platon"
+    ],
+    "bio": "Sokrates hinterließ keine Schriften – sein Denken lebt durch Platon. Seine Methode des systematischen Fragens legte den Grundstein der westlichen Philosophie.",
+    "bio_en": "Socrates left no writings — his thought lives through Plato.",
+    "works": [
+      "Keine eigenen Schriften (überliefert durch Platon)"
+    ]
+  },
+  {
+    "id": "platon",
+    "by": -428,
+    "name": "Platon",
+    "s": "Platon",
+    "life": "428–348 v.Chr.",
+    "era": "Antike",
+    "x": 555,
+    "y": 60,
+    "c": "#F59E0B",
+    "ideas": [
+      "Ideenlehre",
+      "Höhlengleichnis",
+      "Politeia",
+      "Akademie"
+    ],
+    "quote": "Das Staunen ist der Anfang der Weisheit.",
+    "inf": [
+      "aristoteles",
+      "augustinus"
+    ],
+    "bio": "Platon gründete die Akademie – die erste Universität Europas. Die westliche Philosophie ist eine Reihe von Fußnoten zu Platon.",
+    "bio_en": "Plato founded the Academy — Europe's first university.",
+    "works": [
+      "Politeia (~375 v.Chr.)",
+      "Symposion (~385 v.Chr.)",
+      "Phaidon (~385 v.Chr.)"
+    ]
+  },
+  {
+    "id": "aristoteles",
+    "by": -384,
+    "name": "Aristoteles",
+    "s": "Aristoteles",
+    "life": "384–322 v.Chr.",
+    "era": "Antike",
+    "x": 625,
+    "y": 55,
+    "c": "#F59E0B",
+    "ideas": [
+      "Logik",
+      "Eudaimonia",
+      "Metaphysik",
+      "Empirismus"
+    ],
+    "quote": "Das Ziel des Menschen ist die Glückseligkeit.",
+    "inf": [
+      "thomas",
+      "ibnrushd",
+      "ibnSina"
+    ],
+    "bio": "Aristoteles schuf das erste systematische Wissenssystem der Menschheit – von Logik über Biologie bis Ethik.",
+    "bio_en": "Aristotle created the first systematic body of knowledge.",
+    "works": [
+      "Nikomachische Ethik (~340 v.Chr.)",
+      "Metaphysik (~350 v.Chr.)",
+      "Politik (~335 v.Chr.)"
+    ]
+  },
+  {
+    "id": "augustinus",
+    "by": 354,
+    "name": "Augustinus",
+    "s": "Augustinus",
+    "life": "354–430 n.Chr.",
+    "era": "Mittelalter",
+    "x": 500,
+    "y": 75,
+    "c": "#60A5FA",
+    "ideas": [
+      "Gotteslehre",
+      "Erbsünde",
+      "Confessiones",
+      "Gnade"
+    ],
+    "quote": "Unruhig ist unser Herz, bis es Ruhe findet in dir.",
+    "inf": [
+      "thomas"
+    ],
+    "bio": "Augustinus verband Platons Philosophie mit dem christlichen Glauben. Seine Confessiones sind das erste psychologische Selbstporträt der Weltliteratur.",
+    "bio_en": "Augustine united Platonic philosophy with Christian faith.",
+    "works": [
+      "Confessiones (397–400)",
+      "De Civitate Dei (413–426)"
+    ]
+  },
+  {
+    "id": "thomas",
+    "by": 1225,
+    "name": "Thomas v. Aquin",
+    "s": "Thomas",
+    "life": "1225–1274",
+    "era": "Mittelalter",
+    "x": 670,
+    "y": 80,
+    "c": "#60A5FA",
+    "ideas": [
+      "Gottesbeweis",
+      "Scholastik",
+      "Naturrecht",
+      "Vernunft & Glaube"
+    ],
+    "quote": "Die Liebe trägt den Menschen über sich selbst hinaus.",
+    "inf": [
+      "descartes"
+    ],
+    "bio": "Thomas synthetisierte Aristoteles und christliche Theologie zur Scholastik. Die Summa Theologica ist das umfassendste System des Mittelalters.",
+    "bio_en": "Thomas synthesized Aristotle and Christian theology into Scholasticism.",
+    "works": [
+      "Summa Theologica (1265–1274)",
+      "Summa contra Gentiles (1259–1265)"
+    ]
+  },
+  {
+    "id": "ibnrushd",
+    "by": 1126,
+    "name": "Ibn Rushd",
+    "s": "Ibn Rushd",
+    "life": "1126–1198",
+    "era": "Islamische Phil.",
+    "x": 430,
+    "y": 100,
+    "c": "#60A5FA",
+    "ideas": [
+      "Averroismus",
+      "Aristoteles",
+      "Vernunft & Glaube",
+      "Ewigkeit"
+    ],
+    "quote": "Wissen ist das edelste Gut — es wächst, wenn man es teilt.",
+    "inf": [
+      "thomas"
+    ],
+    "bio": "Ibn Rushd (Averroes) rettete das aristotelische Denken für Europa. Seine Kommentare beeinflussten Thomas von Aquin grundlegend.",
+    "bio_en": "Ibn Rushd (Averroes) rescued Aristotelian thought for Europe.",
+    "works": [
+      "Tahafut al-Tahafut (1180)",
+      "Kommentare zu Aristoteles (1169–1195)"
+    ]
+  },
+  {
+    "id": "descartes",
+    "by": 1596,
+    "name": "René Descartes",
+    "s": "Descartes",
+    "life": "1596–1650",
+    "era": "Neuzeit",
+    "x": 740,
+    "y": 110,
+    "c": "#A78BFA",
+    "ideas": [
+      "Cogito ergo sum",
+      "Methodischer Zweifel",
+      "Dualismus",
+      "Rationalismus"
+    ],
+    "quote": "Ich denke, also bin ich.",
+    "inf": [
+      "kant",
+      "leibniz"
+    ],
+    "bio": "Descartes begründete die neuzeitliche Philosophie durch radikalen Zweifel. Sein Cogito ist der bekannteste Satz der Philosophiegeschichte.",
+    "bio_en": "Descartes founded modern philosophy through radical doubt.",
+    "works": [
+      "Meditationes de prima philosophia (1641)",
+      "Discours de la méthode (1637)"
+    ]
+  },
+  {
+    "id": "spinoza",
+    "by": 1632,
+    "name": "Baruch Spinoza",
+    "s": "Spinoza",
+    "life": "1632–1677",
+    "era": "Rationalismus",
+    "x": 380,
+    "y": 140,
+    "c": "#A78BFA",
+    "ideas": [
+      "Deus sive Natura",
+      "Pantheismus",
+      "Ethica",
+      "Determinismus"
+    ],
+    "quote": "Der freie Mensch denkt an nichts weniger als an den Tod.",
+    "inf": [
+      "kant",
+      "hegel"
+    ],
+    "bio": "Spinoza identifizierte Gott mit der Natur selbst. Seine Ethik beweist die Realität wie ein Mathematiker.",
+    "bio_en": "Spinoza identified God with Nature itself.",
+    "works": [
+      "Ethica (1677, posthum)",
+      "Tractatus Theologico-Politicus (1670)"
+    ]
+  },
+  {
+    "id": "locke",
+    "by": 1632,
+    "name": "John Locke",
+    "s": "Locke",
+    "life": "1632–1704",
+    "era": "Aufklärung",
+    "x": 790,
+    "y": 150,
+    "c": "#96CDFF",
+    "ideas": [
+      "Tabula Rasa",
+      "Empirismus",
+      "Naturrechte",
+      "Sozialvertrag"
+    ],
+    "quote": "Der Verstand ist ein unbeschriebenes Blatt.",
+    "inf": [
+      "kant",
+      "rousseau",
+      "hume",
+      "voltaire"
+    ],
+    "bio": "Locke begründete den modernen Empirismus und die Theorie der Naturrechte. Sein Einfluss auf die US-Verfassung ist direkt.",
+    "bio_en": "Locke founded modern empiricism and natural rights theory.",
+    "works": [
+      "Two Treatises of Government (1689)",
+      "An Essay Concerning Human Understanding (1689)"
+    ]
+  },
+  {
+    "id": "rousseau",
+    "by": 1712,
+    "name": "J.-J. Rousseau",
+    "s": "Rousseau",
+    "life": "1712–1778",
+    "era": "Aufklärung",
+    "x": 330,
+    "y": 165,
+    "c": "#96CDFF",
+    "ideas": [
+      "Gesellschaftsvertrag",
+      "Naturzustand",
+      "Allgemeiner Wille",
+      "Émile"
+    ],
+    "quote": "Der Mensch ist von Natur aus gut.",
+    "inf": [
+      "kant",
+      "marx"
+    ],
+    "bio": "Rousseaus Gesellschaftsvertrag: Der Mensch ist gut – die Zivilisation verdirbt ihn. Seine Ideen entfachten die Französische Revolution.",
+    "bio_en": "Rousseau's Social Contract: humans are naturally good.",
+    "works": [
+      "Du contrat social (1762)",
+      "Émile ou De l'éducation (1762)"
+    ]
+  },
+  {
+    "id": "kant",
+    "by": 1724,
+    "name": "Immanuel Kant",
+    "s": "Kant",
+    "life": "1724–1804",
+    "era": "Aufklärung",
+    "x": 840,
+    "y": 170,
+    "c": "#96CDFF",
+    "ideas": [
+      "Kategorischer Imperativ",
+      "Kritik d. Vernunft",
+      "Pflichtethik",
+      "Autonomie"
+    ],
+    "quote": "Habe Mut, dich deines eigenen Verstandes zu bedienen.",
+    "inf": [
+      "hegel",
+      "schopenhauer",
+      "rawls"
+    ],
+    "bio": "Kant vollzog die Kopernikanische Wende der Philosophie. Sein kategorischer Imperativ ist die tiefste Begründung von Würde und Moral.",
+    "bio_en": "Kant performed the Copernican revolution in philosophy.",
+    "works": [
+      "Kritik der reinen Vernunft (1781)",
+      "Kritik der praktischen Vernunft (1788)",
+      "Grundlegung zur Metaphysik der Sitten (1785)"
+    ]
+  },
+  {
+    "id": "hegel",
+    "by": 1770,
+    "name": "Georg W.F. Hegel",
+    "s": "Hegel",
+    "life": "1770–1831",
+    "era": "Idealismus",
+    "x": 290,
+    "y": 190,
+    "c": "#96CDFF",
+    "ideas": [
+      "Dialektik",
+      "Weltgeist",
+      "Phänomenologie",
+      "Geschichtsphilosophie"
+    ],
+    "quote": "Das Wahre ist das Ganze.",
+    "inf": [
+      "nietzsche",
+      "marx"
+    ],
+    "bio": "Hegels Dialektik revolutionierte das Denken. These–Antithese–Synthese wurde zum Grundrhythmus westlichen Denkens.",
+    "bio_en": "Hegel's dialectic revolutionized thought.",
+    "works": [
+      "Phänomenologie des Geistes (1807)",
+      "Wissenschaft der Logik (1812–1816)"
+    ]
+  },
+  {
+    "id": "schopenhauer",
+    "by": 1788,
+    "name": "A. Schopenhauer",
+    "s": "Schopenhauer",
+    "life": "1788–1860",
+    "era": "Willensphil.",
+    "x": 880,
+    "y": 195,
+    "c": "#FFB95F",
+    "ideas": [
+      "Blinder Wille",
+      "Vorstellung",
+      "Pessimismus",
+      "Kunst & Erlösung"
+    ],
+    "quote": "Das Leben schwankt wie ein Pendel zwischen Schmerz und Langeweile.",
+    "inf": [
+      "nietzsche",
+      "wittgenstein"
+    ],
+    "bio": "Schopenhauer sah hinter aller Erscheinung einen blinden, ziellosen Willen. Sein Pessimismus und Buddhismus-Nähe machten ihn zum originellsten westlichen Denker.",
+    "bio_en": "Schopenhauer saw a blind Will behind all appearances.",
+    "works": [
+      "Die Welt als Wille und Vorstellung (1818)"
+    ]
+  },
+  {
+    "id": "kierkegaard",
+    "by": 1813,
+    "name": "S. Kierkegaard",
+    "s": "Kierkegaard",
+    "life": "1813–1855",
+    "era": "Existenzial.",
+    "x": 250,
+    "y": 230,
+    "c": "#F87171",
+    "ideas": [
+      "Angst",
+      "Entweder-Oder",
+      "Subjektivität",
+      "Glaube"
+    ],
+    "quote": "Das Leben muss rückwärts verstanden, vorwärts gelebt werden.",
+    "inf": [
+      "heidegger",
+      "sartre"
+    ],
+    "bio": "Kierkegaard, der Vater des Existenzialismus, betonte die radikale individuelle Wahl. Angst ist der Schwindel der Freiheit.",
+    "bio_en": "Kierkegaard emphasized radical individual choice.",
+    "works": [
+      "Entweder–Oder (1843)",
+      "Der Begriff Angst (1844)"
+    ]
+  },
+  {
+    "id": "marx",
+    "by": 1818,
+    "name": "Karl Marx",
+    "s": "Marx",
+    "life": "1818–1883",
+    "era": "Sozialphil.",
+    "x": 920,
+    "y": 230,
+    "c": "#FB923C",
+    "ideas": [
+      "Historischer Materialismus",
+      "Kapital",
+      "Klassenkampf",
+      "Entfremdung"
+    ],
+    "quote": "Die Philosophen haben die Welt nur verschieden interpretiert. Es kommt drauf an, sie zu verändern.",
+    "inf": [
+      "foucault",
+      "luxemburg",
+      "trotzki",
+      "weber"
+    ],
+    "bio": "Marx kehrte Hegels Idealismus um: Nicht Ideen, sondern materielle Verhältnisse treiben die Geschichte.",
+    "bio_en": "Marx inverted Hegel: material conditions drive history.",
+    "works": [
+      "Das Kapital (1867)",
+      "Das Kommunistische Manifest (1848, mit Engels)"
+    ]
+  },
+  {
+    "id": "nietzsche",
+    "by": 1844,
+    "name": "F. Nietzsche",
+    "s": "Nietzsche",
+    "life": "1844–1900",
+    "era": "Lebensphil.",
+    "x": 620,
+    "y": 200,
+    "c": "#F87171",
+    "ideas": [
+      "Übermensch",
+      "Wille zur Macht",
+      "Ewige Wiederkehr",
+      "Tod Gottes"
+    ],
+    "quote": "Was mich nicht umbringt, macht mich stärker.",
+    "inf": [
+      "heidegger",
+      "sartre",
+      "foucault"
+    ],
+    "bio": "Nietzsche philosophierte mit dem Hammer. Er hinterfragte alle moralischen Grundlagen der westlichen Welt.",
+    "bio_en": "Nietzsche philosophized with a hammer.",
+    "works": [
+      "Also sprach Zarathustra (1883–1885)",
+      "Jenseits von Gut und Böse (1886)",
+      "Zur Genealogie der Moral (1887)"
+    ]
+  },
+  {
+    "id": "husserl",
+    "by": 1859,
+    "name": "Edmund Husserl",
+    "s": "Husserl",
+    "life": "1859–1938",
+    "era": "Phänomeno.",
+    "x": 560,
+    "y": 230,
+    "c": "#F87171",
+    "ideas": [
+      "Phänomenologie",
+      "Epoché",
+      "Intentionalität",
+      "Lebenswelt"
+    ],
+    "quote": "Zu den Sachen selbst!",
+    "inf": [
+      "heidegger",
+      "sartre"
+    ],
+    "bio": "Husserl begründete die Phänomenologie – die Philosophie des reinen Bewusstseins.",
+    "bio_en": "Husserl founded phenomenology — the philosophy of pure consciousness.",
+    "works": [
+      "Logische Untersuchungen (1900–1901)",
+      "Ideen zu einer reinen Phänomenologie (1913)"
+    ]
+  },
+  {
+    "id": "heidegger",
+    "by": 1889,
+    "name": "M. Heidegger",
+    "s": "Heidegger",
+    "life": "1889–1976",
+    "era": "Existenzial.",
+    "x": 680,
+    "y": 220,
+    "c": "#F87171",
+    "ideas": [
+      "Sein und Zeit",
+      "Dasein",
+      "Geworfenheit",
+      "Sein-zum-Tode"
+    ],
+    "quote": "Die Sprache ist das Haus des Seins.",
+    "inf": [
+      "sartre",
+      "arendt"
+    ],
+    "bio": "Heidegger stellte die Grundfrage neu: Was bedeutet es überhaupt zu sein? Sein und Zeit ist das bedeutendste Werk des 20. Jahrhunderts.",
+    "bio_en": "Heidegger: Being and Time is the most important work of the 20th century.",
+    "works": [
+      "Sein und Zeit (1927)"
+    ]
+  },
+  {
+    "id": "wittgenstein",
+    "by": 1889,
+    "name": "L. Wittgenstein",
+    "s": "Wittgenstein",
+    "life": "1889–1951",
+    "era": "Analytisch",
+    "x": 300,
+    "y": 290,
+    "c": "#FB923C",
+    "ideas": [
+      "Sprachspiele",
+      "Tractatus",
+      "Logik",
+      "Bedeutung"
+    ],
+    "quote": "Worüber man nicht sprechen kann, darüber muss man schweigen.",
+    "inf": [],
+    "bio": "Wittgenstein revolutionierte die Sprachphilosophie zweimal – oft gegen seine eigene frühere Position.",
+    "bio_en": "Wittgenstein revolutionized philosophy of language twice.",
+    "works": [
+      "Tractatus Logico-Philosophicus (1921)",
+      "Philosophische Untersuchungen (1953, posthum)"
+    ]
+  },
+  {
+    "id": "sartre",
+    "by": 1905,
+    "name": "Jean-Paul Sartre",
+    "s": "Sartre",
+    "life": "1905–1980",
+    "era": "Existenzial.",
+    "x": 900,
+    "y": 290,
+    "c": "#F87171",
+    "ideas": [
+      "Existenz vor Essenz",
+      "Radikale Freiheit",
+      "Mauvaise foi",
+      "Engagement"
+    ],
+    "quote": "Wir sind verurteilt, frei zu sein.",
+    "inf": [
+      "arendt",
+      "beauvoir"
+    ],
+    "bio": "Sartre machte den Existenzialismus zur prägendsten Philosophie des 20. Jahrhunderts.",
+    "bio_en": "Sartre made existentialism the defining philosophy of the 20th century.",
+    "works": [
+      "L'Être et le Néant (1943)",
+      "L'existentialisme est un humanisme (1946)"
+    ]
+  },
+  {
+    "id": "beauvoir",
+    "by": 1908,
+    "name": "S. de Beauvoir",
+    "s": "Beauvoir",
+    "life": "1908–1986",
+    "era": "Feminismus",
+    "x": 350,
+    "y": 330,
+    "c": "#E879F9",
+    "ideas": [
+      "Das andere Geschlecht",
+      "Feminismus",
+      "Existenzialismus",
+      "Freiheit"
+    ],
+    "quote": "Man wird nicht als Frau geboren, man wird dazu gemacht.",
+    "inf": [
+      "arendt",
+      "wollstonecraft"
+    ],
+    "bio": "Beauvoirs Das andere Geschlecht begründete die feministische Philosophie.",
+    "bio_en": "Beauvoir's The Second Sex founded feminist philosophy.",
+    "works": [
+      "Le Deuxième Sexe (1949)"
+    ]
+  },
+  {
+    "id": "konfuzius",
+    "by": -551,
+    "name": "Konfuzius",
+    "s": "Konfuzius",
+    "life": "551–479 v.Chr.",
+    "era": "Ostasien",
+    "x": 850,
+    "y": 330,
+    "c": "#FCD34D",
+    "ideas": [
+      "Ren",
+      "Li",
+      "Junzi",
+      "Zhengming"
+    ],
+    "quote": "Lernen ohne zu denken ist vergebliche Mühe.",
+    "inf": [],
+    "bio": "Konfuzius begründete den Konfuzianismus – die Ethik, die Ostasien für 2500 Jahre prägte.",
+    "bio_en": "Confucius founded Confucianism, shaping East Asia for 2500 years.",
+    "works": [
+      "Lunyu / Gespräche (postum von Schülern verfasst)"
+    ]
+  },
+  {
+    "id": "arendt",
+    "by": 1906,
+    "name": "Hannah Arendt",
+    "s": "Arendt",
+    "life": "1906–1975",
+    "era": "Zeitgenössisch",
+    "x": 420,
+    "y": 350,
+    "c": "#E879F9",
+    "ideas": [
+      "Vita Activa",
+      "Banalität des Bösen",
+      "Totalitarismus",
+      "Öffentlichkeit"
+    ],
+    "quote": "Denken wir, was wir tun.",
+    "inf": [],
+    "bio": "Arendt analysierte die Katastrophen des 20. Jahrhunderts mit philosophischer Schärfe.",
+    "bio_en": "Arendt analyzed the catastrophes of the 20th century with philosophical precision.",
+    "works": [
+      "The Origins of Totalitarianism (1951)",
+      "Eichmann in Jerusalem (1963)"
+    ]
+  },
+  {
+    "id": "foucault",
+    "by": 1926,
+    "name": "Michel Foucault",
+    "s": "Foucault",
+    "life": "1926–1984",
+    "era": "Postmoderne",
+    "x": 780,
+    "y": 350,
+    "c": "#E879F9",
+    "ideas": [
+      "Macht-Wissen",
+      "Diskursanalyse",
+      "Genealogie",
+      "Biopolitik"
+    ],
+    "quote": "Wo es Macht gibt, gibt es Widerstand.",
+    "inf": [],
+    "bio": "Foucault analysierte wie Macht und Wissen zusammenhängen. Geschichte ist immer Machtgeschichte.",
+    "bio_en": "Foucault analyzed how power and knowledge intertwine.",
+    "works": [
+      "Les Mots et les Choses (1966)",
+      "Surveiller et punir (1975)"
+    ]
+  },
+  {
+    "id": "rawls",
+    "by": 1921,
+    "name": "John Rawls",
+    "s": "Rawls",
+    "life": "1921–2002",
+    "era": "Zeitgenössisch",
+    "x": 480,
+    "y": 300,
+    "c": "#E879F9",
+    "ideas": [
+      "Schleier des Nichtwissens",
+      "Differenzprinzip",
+      "Fairness",
+      "Politischer Liberalismus"
+    ],
+    "quote": "Gerechtigkeit ist die erste Tugend sozialer Institutionen.",
+    "inf": [],
+    "bio": "Rawls' Theorie der Gerechtigkeit revolutionierte die politische Philosophie des 20. Jahrhunderts.",
+    "bio_en": "Rawls' Theory of Justice revolutionized 20th-century political philosophy.",
+    "works": [
+      "A Theory of Justice (1971)"
+    ]
+  },
+  {
+    "id": "ibnSina",
+    "by": 980,
+    "name": "Ibn Sina",
+    "s": "Ibn Sina",
+    "life": "980–1037",
+    "era": "Islamische Phil.",
+    "x": 720,
+    "y": 300,
+    "c": "#60A5FA",
+    "wiki": "Avicenna",
+    "ideas": [
+      "Avicennismus",
+      "Seele & Körper",
+      "Medizin",
+      "Floating Man"
+    ],
+    "quote": "Ich war und mein Sein kannte keine Ursache außer mir selbst.",
+    "inf": [
+      "ibnrushd"
+    ],
+    "bio": "Ibn Sina (Avicenna) war der bedeutendste islamische Philosoph und Arzt des Mittelalters. Sein Kanon der Medizin war 600 Jahre lang das medizinische Standardwerk Europas.",
+    "bio_en": "Ibn Sina was the greatest Islamic philosopher and physician of the Middle Ages. His Canon of Medicine was Europe's standard medical text for 600 years.",
+    "works": [
+      "Der Kanon der Medizin (1025)",
+      "Das Buch der Heilung (1027)"
+    ]
+  },
+  {
+    "id": "leibniz",
+    "by": 1646,
+    "name": "G.W. Leibniz",
+    "s": "Leibniz",
+    "life": "1646–1716",
+    "era": "Rationalismus",
+    "x": 390,
+    "y": 400,
+    "c": "#A78BFA",
+    "wiki": "Gottfried_Wilhelm_Leibniz",
+    "ideas": [
+      "Monadologie",
+      "Theodizee",
+      "Differentialrechnung",
+      "Praestabilierte Harmonie"
+    ],
+    "quote": "Diese Welt ist die beste aller möglichen Welten.",
+    "inf": [
+      "kant"
+    ],
+    "bio": "Leibniz erfand unabhängig von Newton die Differentialrechnung und entwickelte die Monadenlehre. Der letzte universale Geist der Philosophiegeschichte.",
+    "bio_en": "Leibniz independently invented calculus and developed the theory of monads. The last universal mind in the history of philosophy.",
+    "works": [
+      "Monadologie (1714)",
+      "Theodizee (1710)"
+    ]
+  },
+  {
+    "id": "hume",
+    "by": 1711,
+    "name": "David Hume",
+    "s": "Hume",
+    "life": "1711–1776",
+    "era": "Aufklärung",
+    "x": 800,
+    "y": 400,
+    "c": "#96CDFF",
+    "wiki": "David_Hume",
+    "ideas": [
+      "Empirismus",
+      "Kausalität",
+      "Induktionsproblem",
+      "Bündel-Theorie"
+    ],
+    "quote": "Vernunft ist und soll nur die Sklavin der Leidenschaften sein.",
+    "inf": [
+      "kant"
+    ],
+    "bio": "Hume weckte Kant aus seinem dogmatischen Schlummer. Sein radikaler Empirismus revolutionierte die Erkenntnistheorie.",
+    "bio_en": "Hume woke Kant from his dogmatic slumber. His radical empiricism revolutionized epistemology.",
+    "works": [
+      "A Treatise of Human Nature (1739)",
+      "Enquiry Concerning Human Understanding (1748)"
+    ]
+  },
+  {
+    "id": "voltaire",
+    "by": 1694,
+    "name": "Voltaire",
+    "s": "Voltaire",
+    "life": "1694–1778",
+    "era": "Aufklärung",
+    "x": 450,
+    "y": 420,
+    "c": "#96CDFF",
+    "wiki": "Voltaire",
+    "ideas": [
+      "Toleranz",
+      "Religionskritik",
+      "Deismus",
+      "Candide"
+    ],
+    "quote": "Ich stimme dir nicht zu, aber ich würde mein Leben dafür einsetzen, dass du es sagen darfst.",
+    "inf": [
+      "rousseau"
+    ],
+    "bio": "Voltaire war die schärfste Zunge der Aufklärung — gegen Fanatismus und Tyrannei mit Witz und Ironie.",
+    "bio_en": "Voltaire was the sharpest tongue of the Enlightenment — against fanaticism and tyranny with wit and irony.",
+    "works": [
+      "Candide (1759)",
+      "Lettres philosophiques (1734)"
+    ]
+  },
+  {
+    "id": "bergson",
+    "by": 1859,
+    "name": "Henri Bergson",
+    "s": "Bergson",
+    "life": "1859–1941",
+    "era": "Lebensphil.",
+    "x": 740,
+    "y": 420,
+    "c": "#F87171",
+    "wiki": "Henri_Bergson",
+    "ideas": [
+      "Élan Vital",
+      "Dauer",
+      "Intuition",
+      "Gedächtnis"
+    ],
+    "quote": "Die Zeit ist das, was verhindert, dass alles auf einmal geschieht.",
+    "inf": [
+      "sartre"
+    ],
+    "bio": "Bergson stellte die lebendige Zeit (Durée) gegen die mechanische Uhrzeit. Sein Élan Vital beeinflusste Philosophie, Literatur und Biologie.",
+    "bio_en": "Bergson opposed living time to mechanical clock time. His élan vital influenced philosophy, literature, and biology.",
+    "works": [
+      "Schöpferische Evolution (1907)",
+      "Zeit und Freiheit (1889)"
+    ]
+  },
+  {
+    "id": "russell",
+    "by": 1872,
+    "name": "Bertrand Russell",
+    "s": "Russell",
+    "life": "1872–1970",
+    "era": "Analytisch",
+    "x": 540,
+    "y": 130,
+    "c": "#FB923C",
+    "wiki": "Bertrand_Russell",
+    "ideas": [
+      "Logizismus",
+      "Typentheorie",
+      "Atomismus",
+      "Deskriptionstheorie"
+    ],
+    "quote": "Das Problem der modernen Welt ist, dass Dumme so sicher und Kluge so voller Zweifel sind.",
+    "inf": [
+      "wittgenstein"
+    ],
+    "bio": "Russell begründete die analytische Philosophie und versuchte Mathematik auf Logik zu reduzieren. Auch bedeutender Pazifist.",
+    "bio_en": "Russell co-founded analytic philosophy and attempted to reduce mathematics to logic. Also a significant pacifist.",
+    "works": [
+      "Principia Mathematica (1910–1913, mit Whitehead)",
+      "The Problems of Philosophy (1912)"
+    ]
+  },
+  {
+    "id": "camus",
+    "by": 1913,
+    "name": "Albert Camus",
+    "s": "Camus",
+    "life": "1913–1960",
+    "era": "Existenzial.",
+    "x": 650,
+    "y": 140,
+    "c": "#F87171",
+    "wiki": "Albert_Camus",
+    "ideas": [
+      "Absurdismus",
+      "Sisyphos",
+      "Revolte",
+      "Solidarität"
+    ],
+    "quote": "Man muss sich Sisyphus als glücklichen Menschen vorstellen.",
+    "inf": [],
+    "bio": "Camus entwickelte den Absurdismus: Das Leben ist sinnlos, aber wir sollen trotzdem rebellieren. Nobelpreis 1957.",
+    "bio_en": "Camus developed absurdism: life is meaningless, yet we must rebel and be solidary. Nobel Prize 1957.",
+    "works": [
+      "Le Mythe de Sisyphe (1942)",
+      "L'Étranger (1942)"
+    ]
+  },
+  {
+    "id": "jaspers",
+    "by": 1883,
+    "name": "Karl Jaspers",
+    "s": "Jaspers",
+    "life": "1883–1969",
+    "era": "Existenzial.",
+    "x": 610,
+    "y": 350,
+    "c": "#F87171",
+    "wiki": "Karl_Jaspers",
+    "ideas": [
+      "Existenz",
+      "Grenzsituationen",
+      "Kommunikation",
+      "Transzendenz"
+    ],
+    "quote": "Wir werden, was wir sind, durch die Sache, der wir uns widmen.",
+    "inf": [],
+    "bio": "Jaspers sah Grenzsituationen (Tod, Schuld, Kampf) als Orte authentischer Existenz. Auch bedeutender Psychiatrie-Reformer.",
+    "bio_en": "Jaspers saw limit situations as places of authentic existence. Also a significant psychiatric reformer.",
+    "works": [
+      "Psychologie der Weltanschauungen (1919)",
+      "Philosophie (1932)"
+    ]
+  },
+  {
+    "id": "wollstonecraft",
+    "by": 1759,
+    "name": "M. Wollstonecraft",
+    "s": "Wollstonecraft",
+    "life": "1759–1797",
+    "era": "Aufklärung",
+    "x": 590,
+    "y": 300,
+    "c": "#E879F9",
+    "wiki": "Mary_Wollstonecraft",
+    "ideas": [
+      "Frauenrechte",
+      "Vernunft",
+      "Vindicación",
+      "Gleichheit"
+    ],
+    "quote": "Ich möchte keine Macht über Männer, sondern über mich selbst.",
+    "inf": [
+      "beauvoir"
+    ],
+    "bio": "Wollstonecraft schrieb die erste feministische Schrift: A Vindication of the Rights of Woman (1792), ein Jahrhundert vor der Frauenbewegung.",
+    "bio_en": "Wollstonecraft wrote the first major feminist text (1792), a century before the women's movement.",
+    "works": [
+      "A Vindication of the Rights of Woman (1792)"
+    ]
+  },
+  {
+    "id": "popper",
+    "by": 1902,
+    "name": "Karl Popper",
+    "s": "Popper",
+    "life": "1902–1994",
+    "era": "Analytisch",
+    "x": 520,
+    "y": 260,
+    "c": "#FB923C",
+    "wiki": "Karl_Popper",
+    "ideas": [
+      "Falsifizierbarkeit",
+      "Offene Gesellschaft",
+      "Kritischer Rationalismus",
+      "Drei-Welten"
+    ],
+    "quote": "Wahre Unwissenheit ist nicht Mangel an Wissen, sondern Weigerung hinzuzulernen.",
+    "inf": [],
+    "bio": "Popper revolutionierte die Wissenschaftstheorie mit dem Falsifizierungsprinzip. In der Offenen Gesellschaft griff er Platon und Marx als Feinde der Freiheit an.",
+    "bio_en": "Popper revolutionized philosophy of science with falsifiability. In The Open Society he attacked Plato and Marx as enemies of freedom.",
+    "works": [
+      "Logik der Forschung (1934)",
+      "Die offene Gesellschaft und ihre Feinde (1945)"
+    ]
+  },
+  {
+    "id": "weber",
+    "by": 1864,
+    "name": "Max Weber",
+    "s": "Weber",
+    "life": "1864–1920",
+    "era": "Soziologie",
+    "x": 850,
+    "y": 210,
+    "c": "#4ADE80",
+    "ideas": [
+      "Verstehende Soziologie",
+      "Protestantische Ethik",
+      "Bürokratietheorie",
+      "Herrschaftstypen"
+    ],
+    "quote": "Politik bedeutet ein starkes langsames Bohren von harten Brettern mit Leidenschaft und Augenmaß zugleich.",
+    "inf": [],
+    "bio": "Weber begründete die verstehende Soziologie und untersuchte, wie religiöse Ethik wirtschaftliches Handeln prägt – etwa im Zusammenhang von protestantischer Ethik und Kapitalismus.",
+    "bio_en": "Weber founded interpretive sociology and examined how religious ethics shape economic behavior.",
+    "works": [
+      "Die protestantische Ethik und der Geist des Kapitalismus (1905)",
+      "Wirtschaft und Gesellschaft (1922, postum)"
+    ]
+  },
+  {
+    "id": "luxemburg",
+    "by": 1871,
+    "name": "Rosa Luxemburg",
+    "s": "Luxemburg",
+    "life": "1871–1919",
+    "era": "Sozialphil.",
+    "x": 960,
+    "y": 250,
+    "c": "#FB923C",
+    "ideas": [
+      "Spontaneität der Massen",
+      "Akkumulationstheorie",
+      "Antimilitarismus",
+      "Revolutionärer Sozialismus"
+    ],
+    "quote": "Freiheit ist immer nur die Freiheit des Andersdenkenden.",
+    "inf": [],
+    "bio": "Luxemburg entwickelte den Marxismus zu einer Theorie spontaner Massenbewegungen weiter und warnte früh vor der Diktatur einer Partei über das Proletariat. Sie wurde 1919 nach dem Spartakusaufstand ermordet.",
+    "bio_en": "Luxemburg extended Marxism into a theory of spontaneous mass movements and warned early against party dictatorship over the proletariat.",
+    "works": [
+      "Die Akkumulation des Kapitals (1913)",
+      "Die Russische Revolution (1922, postum)"
+    ]
+  },
+  {
+    "id": "trotzki",
+    "by": 1879,
+    "name": "Leo Trotzki",
+    "s": "Trotzki",
+    "life": "1879–1940",
+    "era": "Sozialphil.",
+    "x": 1000,
+    "y": 265,
+    "c": "#FB923C",
+    "ideas": [
+      "Permanente Revolution",
+      "Weltrevolution",
+      "Antistalinismus",
+      "Vierte Internationale"
+    ],
+    "quote": "Man kann sich nicht für den Krieg interessieren, aber der Krieg interessiert sich für dich.",
+    "inf": [],
+    "bio": "Trotzki war Mitorganisator der Oktoberrevolution und entwickelte die Theorie der permanenten Revolution. Nach dem Bruch mit Stalin ins Exil getrieben, wurde er 1940 in Mexiko ermordet.",
+    "bio_en": "Trotsky co-organized the October Revolution and developed the theory of permanent revolution. Exiled after breaking with Stalin, he was assassinated in Mexico in 1940.",
+    "works": [
+      "Die permanente Revolution (1930)",
+      "Verratene Revolution (1936)"
+    ]
+  }
 ];
 const PHM=Object.fromEntries(PH.map(p=>[p.id,p]));
 
@@ -2269,6 +3272,123 @@ document.querySelectorAll('#cmp-toggle, #header-bar .hbtn[onclick^="discoverRand
   });
 })();
 
+
+// ─── STAMMBAUM DER SCHULEN ────────────────────────────────────────────────────
+const SCHOOLS = [{"id": "antike-ethik", "name": "Antike Ethik", "parent": null, "founders": ["sokrates", "platon", "aristoteles"], "year": -400, "category": "philosophisch", "desc": "Grundlage der westlichen Philosophie: Fragen nach dem guten Leben, Tugend und sicherem Wissen."}, {"id": "scholastik", "name": "Scholastik", "parent": "antike-ethik", "founders": ["augustinus", "thomas"], "year": 1250, "category": "religi\u00f6s", "desc": "Verband christlichen Glauben mit aristotelischer Logik im europ\u00e4ischen Mittelalter."}, {"id": "falsafa", "name": "Falsafa", "parent": "antike-ethik", "founders": ["ibnSina", "ibnrushd"], "year": 1000, "category": "religi\u00f6s", "desc": "Bewahrte und erweiterte antikes Wissen in der islamischen Welt und vermittelte es sp\u00e4ter nach Europa."}, {"id": "rationalismus", "name": "Rationalismus", "parent": null, "founders": ["descartes", "spinoza", "leibniz"], "year": 1640, "category": "philosophisch", "desc": "Vernunft statt Sinneserfahrung gilt als Quelle sicheren Wissens."}, {"id": "phaenomenologie", "name": "Ph\u00e4nomenologie", "parent": "rationalismus", "founders": ["husserl"], "year": 1900, "category": "philosophisch", "desc": "Untersucht Bewusstseinserlebnisse 'an sich', bevor Theorien dar\u00fcber gebildet werden."}, {"id": "aufklaerung", "name": "Aufkl\u00e4rung", "parent": "rationalismus", "founders": ["voltaire", "rousseau", "kant"], "year": 1750, "category": "politisch", "desc": "Vernunft, Kritik an Autorit\u00e4t und Tradition, Ideal der Selbstbestimmung des Menschen."}, {"id": "idealismus", "name": "Deutscher Idealismus", "parent": "aufklaerung", "founders": ["kant", "hegel"], "year": 1790, "category": "philosophisch", "desc": "Die Wirklichkeit wird durch den denkenden Geist bzw. das Bewusstsein strukturiert."}, {"id": "marxismus", "name": "Marxismus", "parent": "idealismus", "founders": ["marx"], "year": 1848, "category": "wirtschaftlich", "desc": "Historischer Materialismus: nicht Ideen, sondern wirtschaftliche Verh\u00e4ltnisse und Klassenkampf treiben die Geschichte."}, {"id": "raetekommunismus", "name": "R\u00e4tekommunismus", "parent": "marxismus", "founders": ["luxemburg"], "year": 1913, "category": "politisch", "desc": "Betont spontane Massenbewegungen statt Parteidiktatur als Weg zum Sozialismus."}, {"id": "trotzkismus", "name": "Trotzkismus", "parent": "marxismus", "founders": ["trotzki"], "year": 1930, "category": "politisch", "desc": "Fordert permanente, weltweite Revolution statt 'Sozialismus in einem Land'."}, {"id": "existenzialismus", "name": "Existenzialismus", "parent": "idealismus", "founders": ["kierkegaard"], "year": 1843, "category": "philosophisch", "desc": "Die Existenz des Einzelnen geht jeder abstrakten Idee voraus \u2013 radikale Freiheit und Verantwortung."}, {"id": "atheist-existenzialismus", "name": "Atheistischer Existenzialismus", "parent": "existenzialismus", "founders": ["sartre", "camus", "beauvoir"], "year": 1943, "category": "philosophisch", "desc": "Ohne Gott ist der Mensch 'zur Freiheit verdammt' und muss sich selbst durch Taten definieren."}, {"id": "empirismus", "name": "Empirismus", "parent": null, "founders": ["locke", "hume"], "year": 1690, "category": "philosophisch", "desc": "Alles Wissen entspringt der Erfahrung, nicht angeborenen Ideen."}, {"id": "liberalismus", "name": "Liberalismus", "parent": "empirismus", "founders": ["locke"], "year": 1689, "category": "wirtschaftlich", "desc": "Individuelle Freiheit, Eigentum und begrenzte Staatsmacht als politische und wirtschaftliche Grundwerte."}, {"id": "soziologie", "name": "Verstehende Soziologie", "parent": "empirismus", "founders": ["weber"], "year": 1904, "category": "wirtschaftlich", "desc": "Erkl\u00e4rt gesellschaftliches Handeln durch das Verstehen des subjektiven Sinns, den Menschen ihm geben."}];
+const SC_CAT_COLORS = { philosophisch:'#96CDFF', wirtschaftlich:'#FFBE78', politisch:'#7BAE6E', religiös:'#E879F9' };
+const SCM = Object.fromEntries(SCHOOLS.map(s=>[s.id,s]));
+let scLayout = null, scActiveId = null, scTransform = {x:0,y:0,k:1};
+
+function scComputeLayout(){
+  const children = {};
+  SCHOOLS.forEach(s=>{ children[s.parent] = children[s.parent]||[]; children[s.parent].push(s.id); });
+  const roots = children[null] || [];
+  const LEVEL_H = 130, LEAF_W = 190;
+  let leafCounter = 0;
+  const pos = {};
+  function depthOf(id, d){
+    pos[id] = pos[id] || {};
+    pos[id].y = 70 + d*LEVEL_H;
+    const kids = children[id] || [];
+    if(kids.length===0){
+      pos[id].x = 90 + leafCounter*LEAF_W;
+      leafCounter++;
+    } else {
+      kids.forEach(k=>depthOf(k, d+1));
+      const xs = kids.map(k=>pos[k].x);
+      pos[id].x = xs.reduce((a,b)=>a+b,0)/xs.length;
+    }
+  }
+  roots.forEach(r=>depthOf(r,0));
+  scLayout = pos;
+  return pos;
+}
+
+function scBuildSVG(){
+  const svg = document.getElementById('sc-svg');
+  const pos = scLayout || scComputeLayout();
+  const maxX = Math.max(...Object.values(pos).map(p=>p.x)) + 150;
+  const maxY = Math.max(...Object.values(pos).map(p=>p.y)) + 80;
+  svg.setAttribute('viewBox', '0 0 '+Math.max(maxX,1000)+' '+Math.max(maxY,500));
+
+  let html = '<g id="sc-zoom" transform="translate('+scTransform.x+','+scTransform.y+') scale('+scTransform.k+')">';
+
+  // Verbindungslinien Eltern -> Kind
+  SCHOOLS.forEach(s=>{
+    if(!s.parent) return;
+    const p1 = pos[s.parent], p2 = pos[s.id];
+    const midY = (p1.y + p2.y)/2;
+    html += '<path d="M'+p1.x+','+(p1.y+18)+' C'+p1.x+','+midY+' '+p2.x+','+midY+' '+p2.x+','+(p2.y-18)+
+      '" stroke="rgba(150,205,255,.3)" stroke-width="1.5" fill="none"/>';
+  });
+
+  // Knoten
+  SCHOOLS.forEach(s=>{
+    const p = pos[s.id];
+    const c = SC_CAT_COLORS[s.category] || '#96CDFF';
+    const isActive = s.id === scActiveId;
+    const w = Math.max(120, s.name.length*7.5+30);
+    html += '<g class="sc-node-box'+(isActive?' active':'')+'" data-id="'+s.id+'" style="cursor:pointer" transform="translate('+(p.x-w/2)+','+(p.y-18)+')" onclick="scSelect(\'' + s.id + '\')">'+
+      '<rect width="'+w+'" height="36" rx="18" fill="'+c+'22" stroke="'+c+'" stroke-width="'+(isActive?2:1)+'"/>'+
+      '<text x="'+(w/2)+'" y="23" text-anchor="middle" fill="'+c+'" font-size="11.5" font-family="monospace" font-weight="600">'+s.name+'</text>'+
+      '</g>';
+  });
+
+  html += '</g>';
+  svg.innerHTML = html;
+}
+
+function scSelect(id){
+  scActiveId = id;
+  scBuildSVG();
+  const s = SCM[id];
+  const c = SC_CAT_COLORS[s.category] || '#96CDFF';
+  const panel = document.getElementById('sc-panel');
+  const yearLabel = s.year<0 ? Math.abs(s.year)+' v.Chr.' : s.year;
+  panel.innerHTML = '<div class="scp-cat" style="color:'+c+'">'+s.category+' · ca. '+yearLabel+'</div>'+
+    '<div class="scp-name">'+s.name+'</div>'+
+    '<div class="scp-desc">'+s.desc+'</div>'+
+    '<div class="scp-founders">'+s.founders.map(fid=>{
+      const p = PHM[fid];
+      if(!p) return '';
+      return '<span class="scp-founder" style="color:'+p.c+'" onclick="closeSchools();flyToById(\'' + fid + '\')">'+
+        '<span class="sfd" style="background:'+p.c+';box-shadow:0 0 5px '+p.c+'"></span>'+p.name+'</span>';
+    }).join('')+'</div>';
+  panel.classList.add('show');
+}
+
+function openSchools(){
+  scComputeLayout();
+  scBuildSVG();
+  document.getElementById('sc-overlay').classList.add('show');
+}
+function closeSchools(){
+  document.getElementById('sc-overlay').classList.remove('show');
+  document.getElementById('sc-panel').classList.remove('show');
+  scActiveId = null;
+}
+(function scPanZoom(){
+  const svg = document.getElementById('sc-svg');
+  let dragging=false, start={x:0,y:0}, origin={x:0,y:0};
+  svg.addEventListener('mousedown', e=>{ dragging=true; start={x:e.clientX,y:e.clientY}; origin={...scTransform}; });
+  window.addEventListener('mousemove', e=>{
+    if(!dragging) return;
+    scTransform.x = origin.x + (e.clientX-start.x);
+    scTransform.y = origin.y + (e.clientY-start.y);
+    scBuildSVG();
+  });
+  window.addEventListener('mouseup', ()=>{ dragging=false; });
+  svg.addEventListener('wheel', e=>{
+    e.preventDefault();
+    const delta = e.deltaY>0 ? 0.9 : 1.1;
+    scTransform.k = Math.max(0.4, Math.min(2.2, scTransform.k*delta));
+    scBuildSVG();
+  }, {passive:false});
+})();
+document.addEventListener('keydown', e=>{
+  if(e.key==='Escape' && document.getElementById('sc-overlay').classList.contains('show')) closeSchools();
+});
+
 function discoverRandom(){
   const pick = PH[Math.floor(Math.random()*PH.length)];
   flyToById(pick.id);
@@ -3323,10 +4443,13 @@ document.addEventListener('keydown', e=>{
 
 
 // ─── GEO-KARTE ────────────────────────────────────────────────────────────
-// Geburts-/Wirkungsorte aller 35 Philosophen. Eigenständiges Overlay via
+// Geburts-/Wirkungsorte aller 38 Philosophen. Eigenständiges Overlay via
 // Leaflet + OpenStreetMap (kostenlos, kein API-Key nötig), beeinflusst die
 // 3D-Baum-Szene nicht.
 const GEO_PLACES = {
+  weber:          {lat:49.3988, lng:8.6724,  place:'Heidelberg, Deutschland'},
+  luxemburg:      {lat:52.5200, lng:13.4050, place:'Berlin, Deutschland'},
+  trotzki:        {lat:55.7558, lng:37.6173, place:'Moskau, Russland'},
   sokrates:       {lat:37.9838, lng:23.7275, place:'Athen, Griechenland'},
   platon:         {lat:37.9838, lng:23.7275, place:'Athen, Griechenland'},
   aristoteles:    {lat:40.7128, lng:23.3167, place:'Stageira, Griechenland'},
@@ -3445,7 +4568,7 @@ document.addEventListener('keydown', e=>{
 
 
 // ─── KI-WISSENSGRAPH (Ollama-Embeddings) ─────────────────────────────────
-// Berechnet semantische Ähnlichkeit zwischen allen 35 Philosophen lokal via
+// Berechnet semantische Ähnlichkeit zwischen allen 38 Philosophen lokal via
 // Ollama /api/embeddings (z.B. Modell "nomic-embed-text"). Kein OpenAI-Key
 // nötig. Ergebnis wird in localStorage gecacht. Eigenständiges Overlay,
 // beeinflusst die 3D-Baum-Szene nicht.
@@ -3485,7 +4608,7 @@ async function kgRun(){
   const track=document.getElementById('kg-progress-track');
   runBtn.disabled=true; runBtn.style.opacity='0.5';
   errBox.style.display='none';
-  status.textContent = 'Berechne Embeddings für 35 Philosophen…';
+  status.textContent = 'Berechne Embeddings für 38 Philosophen…';
 
   try{
     const embeddings=[];

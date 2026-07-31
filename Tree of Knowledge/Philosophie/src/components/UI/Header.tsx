@@ -12,6 +12,7 @@ const VIEWS: { id: ViewMode; label: string; key: string }[] = [
   { id: "timeline", label: "Timeline", key: "L" },
   { id: "galaxy", label: "Galaxie", key: "G" },
   { id: "quiz", label: "Quiz", key: "Q" },
+  { id: "schools", label: "Schulen", key: "S" },
 ];
 
 interface Props {

@@ -230,7 +230,7 @@
     "era": "Aufklärung",
     "x": 790,
     "y": 150,
-    "c": "#34D399",
+    "c": "#96CDFF",
     "ideas": [
       "Tabula Rasa",
       "Empirismus",
@@ -260,7 +260,7 @@
     "era": "Aufklärung",
     "x": 330,
     "y": 165,
-    "c": "#34D399",
+    "c": "#96CDFF",
     "ideas": [
       "Gesellschaftsvertrag",
       "Naturzustand",
@@ -288,7 +288,7 @@
     "era": "Aufklärung",
     "x": 840,
     "y": 170,
-    "c": "#34D399",
+    "c": "#96CDFF",
     "ideas": [
       "Kategorischer Imperativ",
       "Kritik d. Vernunft",
@@ -318,7 +318,7 @@
     "era": "Idealismus",
     "x": 290,
     "y": 190,
-    "c": "#34D399",
+    "c": "#96CDFF",
     "ideas": [
       "Dialektik",
       "Weltgeist",
@@ -346,7 +346,7 @@
     "era": "Willensphil.",
     "x": 880,
     "y": 195,
-    "c": "#6EE7B7",
+    "c": "#FFB95F",
     "ideas": [
       "Blinder Wille",
       "Vorstellung",
@@ -410,7 +410,10 @@
     ],
     "quote": "Die Philosophen haben die Welt nur verschieden interpretiert. Es kommt drauf an, sie zu verändern.",
     "inf": [
-      "foucault"
+      "foucault",
+      "luxemburg",
+      "trotzki",
+      "weber"
     ],
     "bio": "Marx kehrte Hegels Idealismus um: Nicht Ideen, sondern materielle Verhältnisse treiben die Geschichte.",
     "bio_en": "Marx inverted Hegel: material conditions drive history.",
@@ -747,7 +750,7 @@
     "era": "Aufklärung",
     "x": 800,
     "y": 400,
-    "c": "#34D399",
+    "c": "#96CDFF",
     "wiki": "David_Hume",
     "ideas": [
       "Empirismus",
@@ -775,7 +778,7 @@
     "era": "Aufklärung",
     "x": 450,
     "y": 420,
-    "c": "#34D399",
+    "c": "#96CDFF",
     "wiki": "Voltaire",
     "ideas": [
       "Toleranz",
@@ -953,6 +956,81 @@
     "works": [
       "Logik der Forschung (1934)",
       "Die offene Gesellschaft und ihre Feinde (1945)"
+    ]
+  },
+  {
+    "id": "weber",
+    "by": 1864,
+    "name": "Max Weber",
+    "s": "Weber",
+    "life": "1864–1920",
+    "era": "Soziologie",
+    "x": 850,
+    "y": 210,
+    "c": "#4ADE80",
+    "ideas": [
+      "Verstehende Soziologie",
+      "Protestantische Ethik",
+      "Bürokratietheorie",
+      "Herrschaftstypen"
+    ],
+    "quote": "Politik bedeutet ein starkes langsames Bohren von harten Brettern mit Leidenschaft und Augenmaß zugleich.",
+    "inf": [],
+    "bio": "Weber begründete die verstehende Soziologie und untersuchte, wie religiöse Ethik wirtschaftliches Handeln prägt – etwa im Zusammenhang von protestantischer Ethik und Kapitalismus.",
+    "bio_en": "Weber founded interpretive sociology and examined how religious ethics shape economic behavior.",
+    "works": [
+      "Die protestantische Ethik und der Geist des Kapitalismus (1905)",
+      "Wirtschaft und Gesellschaft (1922, postum)"
+    ]
+  },
+  {
+    "id": "luxemburg",
+    "by": 1871,
+    "name": "Rosa Luxemburg",
+    "s": "Luxemburg",
+    "life": "1871–1919",
+    "era": "Sozialphil.",
+    "x": 960,
+    "y": 250,
+    "c": "#FB923C",
+    "ideas": [
+      "Spontaneität der Massen",
+      "Akkumulationstheorie",
+      "Antimilitarismus",
+      "Revolutionärer Sozialismus"
+    ],
+    "quote": "Freiheit ist immer nur die Freiheit des Andersdenkenden.",
+    "inf": [],
+    "bio": "Luxemburg entwickelte den Marxismus zu einer Theorie spontaner Massenbewegungen weiter und warnte früh vor der Diktatur einer Partei über das Proletariat. Sie wurde 1919 nach dem Spartakusaufstand ermordet.",
+    "bio_en": "Luxemburg extended Marxism into a theory of spontaneous mass movements and warned early against party dictatorship over the proletariat.",
+    "works": [
+      "Die Akkumulation des Kapitals (1913)",
+      "Die Russische Revolution (1922, postum)"
+    ]
+  },
+  {
+    "id": "trotzki",
+    "by": 1879,
+    "name": "Leo Trotzki",
+    "s": "Trotzki",
+    "life": "1879–1940",
+    "era": "Sozialphil.",
+    "x": 1000,
+    "y": 265,
+    "c": "#FB923C",
+    "ideas": [
+      "Permanente Revolution",
+      "Weltrevolution",
+      "Antistalinismus",
+      "Vierte Internationale"
+    ],
+    "quote": "Man kann sich nicht für den Krieg interessieren, aber der Krieg interessiert sich für dich.",
+    "inf": [],
+    "bio": "Trotzki war Mitorganisator der Oktoberrevolution und entwickelte die Theorie der permanenten Revolution. Nach dem Bruch mit Stalin ins Exil getrieben, wurde er 1940 in Mexiko ermordet.",
+    "bio_en": "Trotsky co-organized the October Revolution and developed the theory of permanent revolution. Exiled after breaking with Stalin, he was assassinated in Mexico in 1940.",
+    "works": [
+      "Die permanente Revolution (1930)",
+      "Verratene Revolution (1936)"
     ]
   }
 ]
