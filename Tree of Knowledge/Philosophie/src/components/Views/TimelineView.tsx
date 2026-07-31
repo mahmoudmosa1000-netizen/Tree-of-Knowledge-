@@ -8,10 +8,27 @@ interface Props {
 }
 
 export default function TimelineView({ philosophers }: Props) {
-  const select = useTreeStore((s) => s.select);
-  const sorted = [...philosophers].sort((a, b) => a.birthYear - b.birthYear);
+  const { select, search } = useTreeStore();
+  const query = search.trim().toLowerCase();
+
+  const sorted = [...philosophers]
+    .filter((p) => !query || p.name.toLowerCase().includes(query))
+    .sort((a, b) => a.birthYear - b.birthYear);
 
   let lastEra = "";
+
+  if (sorted.length === 0) {
+    return (
+      <div className="w-full h-full flex items-center justify-center px-6">
+        <div className="text-center animate-fade-in">
+          <p className="font-display italic text-h3 text-muted mb-1">Keine Treffer</p>
+          <p className="text-meta text-muted/70">
+            Niemand auf der Zeitleiste trägt „{search.trim()}" im Namen.
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="w-full h-full overflow-y-auto px-6 py-10">
@@ -43,7 +60,7 @@ export default function TimelineView({ philosophers }: Props) {
 
               <button
                 onClick={() => select(p.id)}
-                className="relative block text-left mb-9 w-full group"
+                className="relative block text-left mb-9 w-full group rounded-lg focus-visible:ring-2 focus-visible:ring-violet-bright/50 outline-none"
               >
                 <span
                   className="absolute -left-[38px] top-1.5 w-2.5 h-2.5 rounded-full transition-transform duration-300 group-hover:scale-125"

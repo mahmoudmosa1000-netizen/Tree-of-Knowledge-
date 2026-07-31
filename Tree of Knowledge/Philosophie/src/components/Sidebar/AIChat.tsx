@@ -66,7 +66,7 @@ export default function AIChat({ philosopher }: Props) {
   };
 
   return (
-    <div className="border-t border-accent/15 pt-4">
+    <div className="border-t border-violet/15 pt-4">
       <div className="text-label text-violet-bright/80 font-mono font-semibold mb-2.5">
         🦙 Frag {philosopher.name}
       </div>
@@ -92,12 +92,14 @@ export default function AIChat({ philosopher }: Props) {
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && send()}
           placeholder={`Was würde ${philosopher.shortName} sagen?`}
-          className="flex-1 bg-white/5 border border-violet/25 rounded-lg px-3 py-1.5 text-body text-ink placeholder:text-muted outline-none focus:border-violet-bright"
+          aria-label={`Frage an ${philosopher.name}`}
+          className="flex-1 bg-white/5 border border-violet/25 rounded-lg px-3 py-1.5 text-body text-ink placeholder:text-muted outline-none focus-visible:border-violet-bright focus-visible:ring-2 focus-visible:ring-violet-bright/40"
         />
         <button
           onClick={send}
           disabled={loading}
-          className="text-body px-3 py-1.5 rounded-full bg-gold/15 border border-gold/40 text-gold-bright disabled:opacity-40 hover:bg-gold/25 transition-colors"
+          aria-label="Frage senden"
+          className="text-body px-3 py-1.5 rounded-full bg-gold/15 border border-gold/40 text-gold-bright disabled:opacity-40 hover:bg-gold/25 transition-colors focus-visible:ring-2 focus-visible:ring-gold-bright/50 outline-none"
         >
           ➤
         </button>

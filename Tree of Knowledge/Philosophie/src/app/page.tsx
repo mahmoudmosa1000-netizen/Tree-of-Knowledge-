@@ -2,6 +2,9 @@
 
 import { useEffect, useState } from "react";
 import Header from "@/components/UI/Header";
+import IntroOverlay from "@/components/UI/IntroOverlay";
+import CompareView from "@/components/UI/CompareView";
+import TreeSkeleton from "@/components/UI/TreeSkeleton";
 import Sidebar from "@/components/Sidebar/Sidebar";
 import TreeSVG from "@/components/Tree/TreeSVG";
 import MindMapView from "@/components/Views/MindMapView";
@@ -13,7 +16,7 @@ import type { Philosopher, ViewMode } from "@/types";
 type ApiPhilosopher = Philosopher & { influences: string[] };
 
 export default function Page() {
-  const { view, setView, select, selectedId } = useTreeStore();
+  const { view, setView, select, selectedId, compareIds, compareOpen, setCompareOpen } = useTreeStore();
   const [philosophers, setPhilosophers] = useState<ApiPhilosopher[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -51,40 +54,49 @@ export default function Page() {
       };
       const key = e.key.toLowerCase();
       if (map[key]) setView(map[key]);
+      if (key === "r" && philosophers.length > 0) {
+        const pick = philosophers[Math.floor(Math.random() * philosophers.length)];
+        setView("tree");
+        select(pick.id);
+      }
       if (e.key === "Escape") select(null);
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [setView, select]);
+  }, [setView, select, philosophers]);
 
   const selected = philosophers.find((p) => p.id === selectedId) ?? null;
 
   if (loading) {
     return (
-      <div className="fixed inset-0 flex flex-col items-center justify-center gap-5">
-        <div className="font-display italic text-gold text-initial animate-pulse">T</div>
-        <div className="w-9 h-9 border-2 border-white/10 border-t-gold rounded-full animate-spin" />
-        <p className="text-gold-dim text-label font-mono uppercase">
-          lädt …
-        </p>
-      </div>
+      <>
+        <IntroOverlay />
+        <TreeSkeleton />
+      </>
     );
   }
 
   if (error) {
     return (
-      <div className="fixed inset-0 flex flex-col items-center justify-center gap-2 px-6 text-center">
-        <p className="text-ember font-mono text-body">⚠ {error}</p>
-        <p className="text-muted text-meta">
-          Läuft die Datenbank? Alternativ die Standalone <code>index.html</code> öffnen.
-        </p>
-      </div>
+      <>
+        <IntroOverlay />
+        <div
+          className="fixed inset-0 flex flex-col items-center justify-center gap-2 px-6 text-center"
+          role="alert"
+        >
+          <p className="text-ember font-mono text-body">⚠ {error}</p>
+          <p className="text-muted text-meta">
+            Läuft die Datenbank? Alternativ die Standalone <code>index.html</code> öffnen.
+          </p>
+        </div>
+      </>
     );
   }
 
   return (
     <main className="fixed inset-0">
-      <Header />
+      <IntroOverlay />
+      <Header philosophers={philosophers} />
 
       <div className="absolute inset-0 pt-16">
         <div key={view} className="w-full h-full animate-fade-in-up">
@@ -97,6 +109,16 @@ export default function Page() {
       </div>
 
       <Sidebar philosopher={selected} />
+      <CompareView philosophers={philosophers} />
+
+      {compareIds.length === 2 && !compareOpen && (
+        <button
+          onClick={() => setCompareOpen(true)}
+          className="fixed bottom-6 left-1/2 -translate-x-1/2 z-40 text-body px-5 py-2.5 rounded-full bg-gold/15 border border-gold/40 text-gold-bright hover:bg-gold/25 transition-colors backdrop-blur-xl shadow-lg animate-pop-in focus-visible:ring-2 focus-visible:ring-gold-bright/50 outline-none"
+        >
+          ⚖ Vergleich anzeigen
+        </button>
+      )}
     </main>
   );
 }

@@ -9,6 +9,16 @@
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;
+  clip:rect(0,0,0,0);white-space:nowrap;border:0}
+.noise-layer{position:fixed;inset:0;z-index:5;pointer-events:none;opacity:.035;mix-blend-mode:overlay;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
+.glass-panel{box-shadow:0 1px 0 0 rgba(255,255,255,.06) inset,0 24px 48px -12px rgba(0,0,0,.55),
+  0 8px 24px -8px rgba(0,0,0,.4),0 0 0 1px rgba(150,205,255,.08)}
+.glass-panel-gold{box-shadow:0 1px 0 0 rgba(255,255,255,.06) inset,0 24px 48px -12px rgba(0,0,0,.55),
+  0 8px 24px -8px rgba(0,0,0,.4),0 0 0 1px rgba(255,190,120,.1)}
+#sb-spotlight{position:absolute;inset:0;pointer-events:none;opacity:0;transition:opacity .5s;z-index:0}
+#sidebar:hover #sb-spotlight{opacity:1}
 body{background:#03050A;overflow:hidden;font-family:'Inter',system-ui,sans-serif;color:#DCE9FF}
 body::before{content:'';position:fixed;inset:0;z-index:-2;pointer-events:none;
   background-image:
@@ -25,15 +35,19 @@ body::after{content:'';position:fixed;inset:0;z-index:-1;pointer-events:none;
 .sb-quote{font-family:'Fraunces',Georgia,serif;font-style:italic}
 canvas{display:block;position:fixed;inset:0}
 #loading{position:fixed;inset:0;padding-top:38px;background:#03050A;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:16px;z-index:200}
+#load-skeleton{position:absolute;inset:0;width:100%;height:100%;opacity:.7}
+.load-skel-dot{animation:loadSkelPulse 1.8s ease-in-out infinite}
+@keyframes loadSkelPulse{0%,100%{opacity:.3}50%{opacity:.8}}
 #loading .sp{width:44px;height:44px;border:2px solid #001833;border-top-color:#C8E1FF;border-radius:50%;animation:spin 1s linear infinite}
 #loading p{color:#96CDFF;font-size:11px;letter-spacing:5px;font-family:monospace}
 @keyframes spin{to{transform:rotate(360deg)}}
-#sidebar{position:fixed;right:0;top:0;bottom:0;width:min(420px,92vw);background:rgba(0,4,18,.96);border-left:1px solid rgba(150,205,255,.24);backdrop-filter:blur(20px);padding:26px 24px 40px;transform:translateX(100%);transition:transform .5s cubic-bezier(.34,1.56,.64,1);overflow-y:auto;z-index:100;scrollbar-width:thin}
+#sidebar{position:fixed;right:0;top:0;bottom:0;width:min(420px,92vw);background:rgba(0,4,18,.9);border-left:1px solid rgba(150,205,255,.15);backdrop-filter:blur(20px);padding:26px 24px 40px;transform:translateX(100%);transition:transform .5s cubic-bezier(.34,1.56,.64,1);overflow-y:auto;z-index:100;scrollbar-width:thin;box-shadow:0 1px 0 0 rgba(255,255,255,.06) inset,0 24px 48px -12px rgba(0,0,0,.55),0 8px 24px -8px rgba(0,0,0,.4),0 0 0 1px rgba(150,205,255,.08)}
 #sidebar::-webkit-scrollbar{width:5px}
 #sidebar::-webkit-scrollbar-thumb{background:rgba(150,205,255,.25);border-radius:3px}
 #sidebar.open{transform:translateX(0)}
-.sb-close{position:absolute;top:14px;right:14px;background:none;border:none;color:#28203C;font-size:18px;cursor:pointer;line-height:1}
-.sb-close:hover{color:#96CDFF}
+.sb-close{position:absolute;top:14px;right:14px;background:none;border:none;color:#5A6A8A;font-size:18px;cursor:pointer;line-height:1;transition:color .18s,transform .18s}
+.sb-close:hover{color:#96CDFF;transform:scale(1.1)}
+.sb-close:focus-visible{outline:none;box-shadow:0 0 0 3px rgba(150,205,255,.35);border-radius:4px}
 .sb-era{font-size:10px;color:#96CDFF;letter-spacing:3px;text-transform:uppercase;margin-bottom:7px;font-family:monospace;font-weight:700}
 .sb-name{font-size:26px;font-weight:900;color:#C8E1FF;margin-bottom:4px;text-shadow:0 0 18px #96CDFF99;line-height:1.15}
 .sb-life{font-size:11px;color:#9FC3E8;margin-bottom:18px;font-family:monospace}
@@ -41,10 +55,70 @@ canvas{display:block;position:fixed;inset:0}
 .sb-section{font-size:10px;letter-spacing:2.5px;color:#4A7BA8;text-transform:uppercase;margin-bottom:9px;font-weight:600}
 .sb-bio{font-size:13.5px;color:#9FC3E8;line-height:1.78;margin-bottom:20px}
 .sb-ideas{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:18px}
-.sb-tag{font-size:11px;padding:3px 10px;border-radius:20px;font-family:monospace}
+.sb-tag{font-size:11px;padding:3px 10px;border-radius:20px;font-family:monospace;transition:transform .15s,filter .15s}
+.sb-tag:hover{transform:translateY(-1px);filter:brightness(1.25)}
 .sb-inf{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:18px}
-.sb-inf span{font-size:11px;padding:3px 10px;border-radius:20px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);color:#382C48}
+.sb-inf span{font-size:11px;padding:3px 10px;border-radius:20px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);color:#9FC3E8}
 .sb-divider{height:1px;background:linear-gradient(to right,transparent,rgba(150,205,255,.2),transparent);margin:16px 0}
+
+.cmp-toggle-btn{width:100%;margin-bottom:16px;padding:9px 14px;border-radius:20px;font-size:11px;
+  font-family:monospace;cursor:pointer;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.1);
+  color:#9FC3E8;transition:background .18s,border-color .18s,color .18s;text-align:center}
+.cmp-toggle-btn:hover{border-color:rgba(255,190,120,.4);color:#FFBE78}
+.cmp-toggle-btn:focus-visible{outline:none;box-shadow:0 0 0 3px rgba(255,190,120,.35)}
+.cmp-toggle-btn.active{background:rgba(255,190,120,.14);border-color:#FFBE78;color:#FFBE78}
+
+#cmp-pill{position:fixed;bottom:26px;left:50%;transform:translateX(-50%);z-index:150;
+  background:rgba(255,190,120,.14);border:1px solid #FFBE78;color:#FFBE78;font-family:monospace;
+  font-size:13px;padding:11px 24px;border-radius:24px;cursor:pointer;display:none;
+  box-shadow:0 12px 32px rgba(0,0,0,.4);transition:transform .15s,background .18s}
+#cmp-pill:hover{background:rgba(255,190,120,.24);transform:translateX(-50%) translateY(-2px)}
+#cmp-pill.show{display:block}
+
+#cmp-overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:400;display:none;
+  align-items:center;justify-content:center;padding:24px}
+#cmp-overlay.show{display:flex}
+#cmp-box{background:rgba(10,15,26,.92);border:1px solid rgba(150,205,255,.12);border-radius:18px;
+  max-width:820px;width:100%;max-height:88vh;overflow-y:auto;padding:28px;backdrop-filter:blur(20px);
+  box-shadow:0 1px 0 0 rgba(255,255,255,.06) inset,0 24px 48px -12px rgba(0,0,0,.55),0 8px 24px -8px rgba(0,0,0,.4),0 0 0 1px rgba(150,205,255,.08)}
+.cmp-head{display:flex;align-items:center;justify-content:between;margin-bottom:8px}
+.cmp-head-title{font-size:10px;letter-spacing:3px;color:#96CDFF;font-family:monospace;text-transform:uppercase}
+.cmp-relation{text-align:center;font-size:13px;font-family:monospace;color:#9FC3E8;margin:6px 0 4px}
+.cmp-empty-hint{text-align:center;font-size:12px;color:#6B7FA0;font-family:monospace;padding:36px 10px}
+.cmp-pickers{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:6px}
+.cmp-picker-input{width:100%;background:rgba(255,255,255,.04);border:1px solid rgba(150,205,255,.25);
+  border-radius:9px;padding:9px 12px;color:#DCE9FF;font-size:12.5px;font-family:'Inter',sans-serif;outline:none}
+.cmp-picker-input:focus{border-color:#96CDFF;box-shadow:0 0 0 3px rgba(150,205,255,.25)}
+.cmp-picker-chip{width:100%;display:flex;align-items:center;gap:10px;background:rgba(255,255,255,.03);
+  border:1px solid rgba(150,205,255,.25);border-radius:9px;padding:8px 12px;cursor:pointer;
+  transition:border-color .18s}
+.cmp-picker-chip:hover{border-color:#96CDFF}
+.cmp-picker-initial{font-family:'Fraunces',Georgia,serif;font-style:italic;font-size:22px;line-height:1;flex-shrink:0}
+.cmp-picker-name{font-size:13px;color:#DCE9FF;font-family:'Fraunces',Georgia,serif;font-style:italic}
+.cmp-picker-sub{font-size:10px;color:#6B7FA0;font-family:monospace}
+.cmp-picker-list{position:relative}
+.cmp-picker-dropdown{position:absolute;top:calc(100% + 4px);left:0;right:0;background:#0A0F1A;
+  border:1px solid rgba(150,205,255,.3);border-radius:9px;max-height:200px;overflow-y:auto;z-index:20;
+  box-shadow:0 16px 40px rgba(0,0,0,.5)}
+.cmp-picker-item{display:flex;align-items:center;gap:8px;padding:8px 12px;cursor:pointer;font-size:12px;
+  color:#DCE9FF;font-family:'Inter',sans-serif}
+.cmp-picker-item:hover{background:rgba(150,205,255,.1)}
+.cmp-picker-item .cpd{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.cmp-picker-item .cpe{margin-left:auto;font-size:10px;color:#6B7FA0;font-family:monospace}
+
+.cmp-table{margin-top:8px}
+.cmp-row{display:grid;grid-template-columns:88px 1fr 1fr;gap:16px;padding:14px 0;
+  border-top:1px solid rgba(255,255,255,.06)}
+.cmp-row:first-child{border-top:none;padding-top:4px}
+.cmp-row-label{font-size:10px;letter-spacing:2px;color:rgba(150,205,255,.7);font-family:monospace;
+  text-transform:uppercase;padding-top:2px}
+.cmp-row-name{font-family:'Fraunces',Georgia,serif;font-style:italic;font-size:18px}
+.cmp-row-quote{font-family:'Fraunces',Georgia,serif;font-style:italic;font-size:13.5px;color:rgba(220,233,255,.85);line-height:1.55}
+.cmp-tags{display:flex;flex-wrap:wrap;gap:6px}
+.cmp-tag{font-size:10px;padding:3px 9px;border-radius:12px;font-family:monospace}
+.cmp-work{font-size:12px;color:rgba(220,233,255,.75);border-left:2px solid rgba(150,205,255,.3);
+  padding:5px 10px;border-radius:0 6px 6px 0;background:rgba(255,255,255,.02);margin-bottom:5px}
+@media(max-width:640px){.cmp-row,.cmp-pickers{grid-template-columns:1fr 1fr}.cmp-row{grid-template-columns:1fr 1fr}.cmp-row-label{display:none}}
 .sb-works{display:flex;flex-direction:column;gap:6px;margin-bottom:18px}
 .sb-work{display:flex;align-items:flex-start;gap:8px;font-size:11px;color:#9FC3E8;line-height:1.5;
   background:rgba(255,255,255,.025);border-left:2px solid rgba(150,205,255,.25);
@@ -67,7 +141,7 @@ canvas{display:block;position:fixed;inset:0}
 /* ── Intro-Titel ───────────────────────────────── */
 #intro-title{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:90;pointer-events:none;transition:opacity 1.2s}
 #intro-title h1{font-size:clamp(28px,5vw,52px);font-weight:500;font-style:italic;color:#C8E1FF;text-shadow:0 0 24px #96CDFF66,0 0 50px #4A7BA833;letter-spacing:.02em;margin-bottom:12px;text-align:center}
-#intro-title p{font-size:13.5px;color:#3A3050;letter-spacing:4px;font-family:monospace}
+#intro-title p{font-size:13.5px;color:#4A7BA8;letter-spacing:4px;font-family:monospace}
 /* ── Zeitleiste ────────────────────────────────── */
 
 
@@ -126,18 +200,21 @@ canvas{display:block;position:fixed;inset:0}
 #loading .progress-bar{height:100%;background:linear-gradient(90deg,#96CDFF,#C8E1FF);width:0%;transition:width .3s;box-shadow:0 0 8px #96CDFF}
 
 .sb-ai-title{display:flex;align-items:center;gap:6px;font-size:10px;letter-spacing:2.5px;color:#C8E1FF;text-transform:uppercase;margin-bottom:10px;font-family:monospace}
-.sb-ai-desc{font-size:11px;color:#28203C;margin-bottom:10px;line-height:1.5}
+.sb-ai-desc{font-size:11px;color:#6B7FA0;margin-bottom:10px;line-height:1.5}
 .sb-sugg{display:flex;flex-direction:column;gap:5px;margin-bottom:10px}
 .sb-sugg button{background:rgba(150,205,255,.05);border:1px solid rgba(150,205,255,.15);border-radius:7px;color:#9FC3E8;font-size:11px;padding:7px 10px;text-align:left;cursor:pointer;font-family:'Inter',sans-serif;transition:background .15s}
 .sb-sugg button:hover{background:rgba(150,205,255,.12)}
+.sb-sugg button:focus-visible{outline:none;box-shadow:0 0 0 3px rgba(150,205,255,.35)}
 .sb-ai-row{display:flex;gap:6px;margin-bottom:10px}
 .sb-ai-row input{flex:1;background:rgba(255,255,255,.04);border:1px solid rgba(150,205,255,.2);border-radius:7px;padding:8px 10px;color:#DCE9FF;font-size:11px;outline:none;font-family:'Inter',sans-serif}
-.sb-ai-row input:focus{border-color:rgba(0,200,255,.5)}
-.sb-ai-row button{background:#FFBE78;border:none;border-radius:7px;color:#1A1522;font-weight:700;padding:8px 14px;cursor:pointer;font-size:13.5px;flex-shrink:0}
+.sb-ai-row input:focus{border-color:#96CDFF;box-shadow:0 0 0 3px rgba(150,205,255,.25)}
+.sb-ai-row button{background:#FFBE78;border:none;border-radius:7px;color:#1A1522;font-weight:700;padding:8px 14px;cursor:pointer;font-size:13.5px;flex-shrink:0;transition:background .18s,transform .15s}
+.sb-ai-row button:hover:not(:disabled){background:#FFCF98;transform:translateY(-1px)}
+.sb-ai-row button:focus-visible{outline:none;box-shadow:0 0 0 3px rgba(255,190,120,.4)}
 .sb-ai-row button:disabled{background:rgba(150,205,255,.3);cursor:default}
 .sb-ai-resp{background:rgba(150,205,255,.04);border-left:2px solid rgba(150,205,255,.35);border-radius:6px;padding:10px 12px;font-size:11px;line-height:1.65;color:#9FC3E8;max-height:200px;overflow-y:auto;white-space:pre-wrap}
 .sb-ai-resp.err{color:#FF8899;border-color:#FF446688}
-.sb-ai-status{font-size:10px;color:#1D1830;font-family:monospace;margin-bottom:8px;cursor:pointer;text-decoration:underline dotted}
+.sb-ai-status{font-size:10px;color:#6B7FA0;font-family:monospace;margin-bottom:8px;cursor:pointer;text-decoration:underline dotted;transition:color .15s}
 .sb-ai-status:hover{color:#96CDFF}
 
 /* ══════════════════════════════════════════════════════════════════
@@ -156,12 +233,12 @@ canvas{display:block;position:fixed;inset:0}
   box-shadow:0 0 6px #96CDFF;flex-shrink:0}
 #header-search-wrap{position:relative;flex:1;max-width:340px;min-width:120px}
 #header-search-wrap .icon{position:absolute;left:11px;top:50%;transform:translateY(-50%);
-  color:#3A3050;font-size:13.5px;pointer-events:none}
+  color:#5A6A8A;font-size:13.5px;pointer-events:none}
 #search-box{width:100%;background:rgba(255,255,255,.05);border:1px solid rgba(150,205,255,.22);
   border-radius:18px;padding:7px 14px 7px 30px;font-size:11px;color:#C8E1FF;
   font-family:monospace;outline:none;transition:border-color .2s,background .2s}
-#search-box::placeholder{color:#241F38}
-#search-box:focus{border-color:rgba(0,220,255,.55);background:rgba(150,205,255,.06)}
+#search-box::placeholder{color:#4A5570}
+#search-box:focus{border-color:#96CDFF;background:rgba(150,205,255,.06);box-shadow:0 0 0 3px rgba(150,205,255,.25)}
 #search-results{position:absolute;top:calc(100% + 8px);left:0;right:0;
   background:rgba(0,4,18,.97);border:1px solid rgba(150,205,255,.22);border-radius:10px;
   z-index:210;overflow:hidden;display:none;max-height:60vh;overflow-y:auto;
@@ -169,6 +246,7 @@ canvas{display:block;position:fixed;inset:0}
 .sr-item{padding:9px 14px;font-size:11px;cursor:pointer;font-family:monospace;
   transition:background .15s;display:flex;align-items:center;gap:9px}
 .sr-item:hover{background:rgba(150,205,255,.12)}
+.sr-item:focus-visible{outline:none;background:rgba(150,205,255,.15)}
 .sr-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
 
 #header-tools{display:flex;align-items:center;gap:5px;flex-shrink:0;margin-left:auto}
@@ -178,6 +256,7 @@ canvas{display:block;position:fixed;inset:0}
   display:flex;align-items:center;gap:5px}
 .hbtn:hover{border-color:rgba(150,205,255,.4);color:#96CDFF;background:rgba(150,205,255,.06)}
 .hbtn.active{border-color:#96CDFF;color:#96CDFF;background:rgba(150,205,255,.08)}
+.hbtn:focus-visible{outline:none;box-shadow:0 0 0 3px rgba(150,205,255,.35)}
 .hbtn .lbl{display:inline}
 @media(max-width:820px){.hbtn .lbl{display:none}#header-brand span.full{display:none}}
 @media(max-width:600px){#header-search-wrap{max-width:none}}
@@ -193,7 +272,7 @@ canvas{display:block;position:fixed;inset:0}
   flex-wrap:wrap;overflow:hidden}
 .hk{background:rgba(150,205,255,.1);border:1px solid rgba(150,205,255,.28);color:#96CDFF;
   font-size:10px;padding:3px 8px;border-radius:5px;font-family:monospace;flex-shrink:0}
-.hs{color:#28203C;font-size:10px;flex-shrink:0}
+.hs{color:#6B7FA0;font-size:10px;flex-shrink:0}
 @media(max-width:900px){#footer-hint{display:none}}
 
 /* ── ZEITLEISTE (schiebt sich über Footer, kein Overlap) ──────────── */
@@ -206,25 +285,76 @@ canvas{display:block;position:fixed;inset:0}
 #timeline-bar label{font-size:10px;color:#96CDFF;letter-spacing:3px;font-family:monospace;
   display:block;margin-bottom:10px}
 #timeline-bar .row{display:flex;align-items:center;gap:14px}
-#tl-slider{flex:1;accent-color:#C8E1FF;cursor:pointer;height:3px}
+
+/* Play/Pause-Button */
+#tl-play{width:30px;height:30px;flex-shrink:0;border-radius:50%;background:rgba(150,205,255,.1);
+  border:1px solid rgba(150,205,255,.35);color:#96CDFF;font-size:11px;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;padding-left:2px;
+  transition:background .18s,border-color .18s,transform .15s}
+#tl-play:hover{background:rgba(150,205,255,.2);border-color:#96CDFF}
+#tl-play:active{transform:scale(0.92)}
+#tl-play.playing{padding-left:0;background:rgba(255,190,120,.14);border-color:#FFBE78;color:#FFBE78}
+#tl-play:focus-visible{outline:none;box-shadow:0 0 0 3px rgba(150,205,255,.35)}
+
+/* Track-Wrapper trägt Regler + Marker-Layer übereinander */
+#tl-track-wrap{position:relative;flex:1;height:20px;display:flex;align-items:center}
+
+/* Philosophen-Marker: kleine Punkte an der Geburtsjahr-Position, zeigen Dichte über die Geschichte */
+#tl-marks{position:absolute;left:8px;right:8px;top:50%;transform:translateY(-50%);
+  height:8px;pointer-events:none}
+.tl-mark{position:absolute;top:50%;width:5px;height:5px;border-radius:50%;
+  transform:translate(-50%,-50%);pointer-events:auto;cursor:pointer;
+  transition:transform .15s,box-shadow .15s;opacity:.85}
+.tl-mark:hover{transform:translate(-50%,-50%) scale(1.8);opacity:1;z-index:5}
+.tl-mark.tl-mark-future{opacity:.28}
+
+/* Nativer Regler: transparent gemacht, nur der Thumb bleibt sichtbar-gestylt, Track selbst gezeichnet */
+#tl-slider{-webkit-appearance:none;appearance:none;position:relative;z-index:2;
+  flex:1;width:100%;height:20px;background:transparent;cursor:pointer;margin:0}
+#tl-slider::-webkit-slider-runnable-track{
+  height:4px;border-radius:2px;
+  background:linear-gradient(90deg,rgba(74,123,168,.5),rgba(150,205,255,.75) 55%,rgba(255,190,120,.65));
+}
+#tl-slider::-moz-range-track{
+  height:4px;border-radius:2px;
+  background:linear-gradient(90deg,rgba(74,123,168,.5),rgba(150,205,255,.75) 55%,rgba(255,190,120,.65));
+}
+#tl-slider::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;
+  width:16px;height:16px;border-radius:50%;margin-top:-6px;
+  background:#DCE9FF;border:2px solid #96CDFF;
+  box-shadow:0 0 10px rgba(150,205,255,.8),0 0 0 4px rgba(150,205,255,.12);
+  cursor:pointer;transition:transform .15s,box-shadow .15s}
+#tl-slider::-webkit-slider-thumb:hover{transform:scale(1.15)}
+#tl-slider::-webkit-slider-thumb:active{transform:scale(0.95)}
+#tl-slider::-moz-range-thumb{width:16px;height:16px;border-radius:50%;border:2px solid #96CDFF;
+  background:#DCE9FF;box-shadow:0 0 10px rgba(150,205,255,.8),0 0 0 4px rgba(150,205,255,.12);
+  cursor:pointer;transition:transform .15s}
+#tl-slider::-moz-range-thumb:hover{transform:scale(1.15)}
+#tl-slider:focus-visible::-webkit-slider-thumb{box-shadow:0 0 0 4px rgba(150,205,255,.5)}
+
 #tl-year{font-size:13.5px;color:#C8E1FF;font-family:monospace;min-width:84px;text-align:right;
-  text-shadow:0 0 10px #96CDFF;flex-shrink:0}
+  text-shadow:0 0 10px #96CDFF;flex-shrink:0;font-weight:600}
 #tl-name{font-size:11px;color:#9FC3E8;font-family:monospace;flex:1;text-align:center;
-  min-height:14px}
+  min-height:14px;padding:3px 12px;border-radius:12px;transition:background .2s}
+#tl-name:not(:empty){background:rgba(150,205,255,.06)}
 #tl-eras{position:relative;height:22px;margin-top:10px;margin-bottom:16px;border-radius:3px;overflow:visible;
   display:flex}
 .tl-era-seg{position:relative;height:100%;cursor:pointer;transition:opacity .2s;
-  border-right:1px solid rgba(0,0,0,.4)}
+  border-right:1px solid rgba(0,0,0,.4);min-width:3px}
 .tl-era-seg:last-child{border-right:none}
 .tl-era-seg:hover{opacity:0.85}
 .tl-era-seg.dim{opacity:0.4}
 .tl-era-seg.active{opacity:1;box-shadow:inset 0 0 0 2px #fff}
 .tl-era-label{position:absolute;top:100%;left:50%;transform:translateX(-50%);
   font-size:10px;font-family:monospace;font-weight:600;white-space:nowrap;margin-top:4px;
-  letter-spacing:.3px;pointer-events:none;opacity:.85;transition:opacity .15s;
-  overflow:hidden;text-overflow:ellipsis}
-.tl-era-seg:hover .tl-era-label,.tl-era-seg.active .tl-era-label{opacity:1}
-.tl-era-seg.tl-narrow .tl-era-label{display:none}
+  letter-spacing:.3px;pointer-events:none;opacity:.85;transition:opacity .15s;z-index:1;
+  overflow:hidden;text-overflow:ellipsis;background:rgba(3,5,10,.001)}
+/* Schmale Epochen (viele Denker liegen historisch dicht beieinander, z.B. 1770-1926):
+   Label standardmäßig ausgeblendet, um Überlappung zu vermeiden — aber bei Hover/Aktiv
+   trotzdem lesbar, statt komplett unerreichbar zu sein */
+.tl-era-seg.tl-narrow .tl-era-label{opacity:0}
+.tl-era-seg:hover .tl-era-label,.tl-era-seg.active .tl-era-label{opacity:1;z-index:6;background:rgba(3,5,10,.85);
+  padding:2px 6px;border-radius:4px;margin-top:6px}
 
 /* ── SCHNELL-NAV (linker Rand, bleibt zwischen Header/Footer) ────── */
 #quicknav{position:fixed;left:14px;top:50%;transform:translateY(-50%);
@@ -234,6 +364,7 @@ canvas{display:block;position:fixed;inset:0}
 .qn-dot{width:9px;height:9px;border-radius:50%;cursor:pointer;
   transition:transform .2s;position:relative;flex-shrink:0}
 .qn-dot:hover{transform:scale(1.7)}
+.qn-dot:focus-visible{outline:none;transform:scale(1.7);box-shadow:0 0 0 3px rgba(150,205,255,.5)}
 .qn-dot .qn-tip{position:absolute;left:16px;top:50%;transform:translateY(-50%);
   white-space:nowrap;font-size:10px;font-family:monospace;padding:4px 9px;
   background:rgba(0,4,18,.97);border:1px solid currentColor;border-radius:5px;
@@ -253,10 +384,6 @@ canvas{display:block;position:fixed;inset:0}
   z-index:260;display:flex;flex-direction:column;align-items:center;justify-content:center;
   padding:70px 20px 66px;opacity:0;pointer-events:none;transition:opacity .35s}
 #quiz-overlay.show{opacity:1;pointer-events:auto}
-#quiz-close{position:absolute;top:58px;right:20px;background:rgba(255,255,255,.05);
-  border:1px solid rgba(150,205,255,.25);border-radius:8px;color:#9FC3E8;font-size:16px;
-  width:34px;height:34px;cursor:pointer;line-height:1}
-#quiz-close:hover{color:#96CDFF;border-color:#96CDFF}
 
 #quiz-score-bar{display:flex;gap:16px;align-items:center;background:rgba(10,20,30,.7);
   border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:12px 22px;margin-bottom:22px}
@@ -266,12 +393,13 @@ canvas{display:block;position:fixed;inset:0}
 .qz-stat span{font-size:10px;color:#4A7BA8;letter-spacing:2px;text-transform:uppercase}
 .qz-sep{width:1px;height:32px;background:rgba(255,255,255,.1)}
 .qz-reset{background:none;border:1px solid rgba(255,255,255,.12);border-radius:8px;
-  color:#4A7BA8;font-size:11px;padding:6px 12px;cursor:pointer;font-family:monospace}
+  color:#4A7BA8;font-size:11px;padding:6px 12px;cursor:pointer;font-family:monospace;transition:color .18s,border-color .18s}
 .qz-reset:hover{color:#96CDFF;border-color:#96CDFF}
+.qz-reset:focus-visible{outline:none;box-shadow:0 0 0 3px rgba(150,205,255,.35)}
 
-#quiz-card{max-width:600px;width:100%;background:rgba(6,12,22,.92);
-  border:1px solid rgba(150,205,255,.24);border-radius:20px;padding:32px 28px;
-  backdrop-filter:blur(18px);box-shadow:0 26px 70px rgba(0,0,0,.55)}
+#quiz-card{max-width:600px;width:100%;background:rgba(6,12,22,.85);
+  border:1px solid rgba(255,190,120,.12);border-radius:20px;padding:32px 28px;
+  backdrop-filter:blur(18px);box-shadow:0 1px 0 0 rgba(255,255,255,.06) inset,0 26px 70px -12px rgba(0,0,0,.55),0 8px 24px -8px rgba(0,0,0,.4),0 0 0 1px rgba(255,190,120,.1)}
 .qz-type{font-size:10px;letter-spacing:3px;text-transform:uppercase;text-align:center;
   margin-bottom:16px;font-family:monospace}
 .qz-prompt{min-height:96px;display:flex;align-items:center;justify-content:center;
@@ -283,21 +411,27 @@ canvas{display:block;position:fixed;inset:0}
   border-radius:12px;padding:14px 12px;color:#9FC3E8;font-family:'Inter',sans-serif;
   font-size:11px;text-align:center;line-height:1.4;cursor:pointer;transition:all .22s}
 .qz-opt:hover{border-color:rgba(150,205,255,.4);background:rgba(150,205,255,.06)}
+.qz-opt:focus-visible{outline:none;box-shadow:0 0 0 3px rgba(150,205,255,.35)}
 .qz-opt.correct{background:rgba(74,222,128,.14);border-color:#6FA06F;color:#6FA06F;font-weight:700;animation:qzPulse .4s ease-out}
 .qz-opt.wrong{background:rgba(248,113,113,.12);border-color:#F87171;color:#F87171;animation:qzShake .4s ease-in-out}
 @keyframes qzPulse{0%{transform:scale(1)}35%{transform:scale(1.04)}100%{transform:scale(1)}}
+@keyframes kineticWord{0%{opacity:0;transform:translateY(6px)}100%{opacity:1;transform:translateY(0)}}
+.kinetic-word{display:inline-block;opacity:0;animation:kineticWord .45s ease-out forwards}
+@media (prefers-reduced-motion: reduce){.kinetic-word{animation-duration:.01ms!important;opacity:1}}
 @keyframes qzShake{0%,100%{transform:translateX(0)}20%{transform:translateX(-4px)}40%{transform:translateX(4px)}60%{transform:translateX(-3px)}80%{transform:translateX(3px)}}
-.qz-opt.dim{background:rgba(255,255,255,.015);border-color:rgba(255,255,255,.05);color:#28203C}
+.qz-opt.dim{background:rgba(255,255,255,.015);border-color:rgba(255,255,255,.05);color:#4A5570}
 .qz-opt .qz-key{float:right;font-size:10px;opacity:.35;background:rgba(255,255,255,.08);
   border-radius:4px;padding:1px 5px;margin-left:6px}
 .qz-opt .qz-life{display:block;font-size:10px;margin-top:4px;opacity:.65}
 .qz-result{margin-top:22px;text-align:center}
 .qz-result-title{font-size:21px;font-weight:900;font-family:'Inter',monospace}
 .qz-result-name{font-size:13.5px;color:#9FC3E8;margin-top:6px}
-.qz-next{margin-top:16px;background:#96CDFF;border:none;border-radius:10px;
-  color:#1A1522;font-weight:700;font-size:13.5px;padding:12px 36px;cursor:pointer;
-  font-family:monospace;letter-spacing:.5px}
-.qz-next:hover{box-shadow:0 0 22px rgba(150,205,255,.5)}
+.qz-next{margin-top:16px;background:#96CDFF;border:none;border-radius:12px;
+  color:#1A1522;font-weight:700;font-size:13.5px;padding:13px 32px;cursor:pointer;
+  font-family:monospace;letter-spacing:.5px;transition:box-shadow .2s,transform .15s}
+.qz-next:hover{box-shadow:0 0 22px rgba(150,205,255,.5);transform:translateY(-1px)}
+.qz-next:active{transform:translateY(0)}
+.qz-next:focus-visible{outline:none;box-shadow:0 0 0 3px rgba(150,205,255,.4)}
 #quiz-progress{max-width:340px;width:100%;margin-top:20px}
 #quiz-progress .qp-row{display:flex;justify-content:space-between;font-size:10px;
   color:#4A7BA8;font-family:monospace;margin-bottom:5px}
@@ -312,13 +446,6 @@ canvas{display:block;position:fixed;inset:0}
 #mm-overlay{position:fixed;inset:0;background:rgba(0,2,10,.94);backdrop-filter:blur(10px);
   z-index:260;opacity:0;pointer-events:none;transition:opacity .35s}
 #mm-overlay.show{opacity:1;pointer-events:auto}
-#mm-close{position:absolute;top:58px;right:20px;background:rgba(255,255,255,.05);
-  border:1px solid rgba(150,205,255,.25);border-radius:8px;color:#9FC3E8;font-size:16px;
-  width:34px;height:34px;cursor:pointer;line-height:1;z-index:270}
-#mm-close:hover{color:#96CDFF;border-color:#96CDFF}
-#mm-title{position:fixed;top:58px;left:50%;transform:translateX(-50%);
-  font-size:10px;letter-spacing:4px;color:#4A7BA8;font-family:monospace;
-  text-transform:uppercase;z-index:270;pointer-events:none}
 #mm-svg{position:absolute;inset:0;width:100%;height:100%;cursor:grab}
 #mm-svg.dragging{cursor:grabbing}
 #mm-tooltip{position:fixed;background:rgba(4,10,22,.97);border:1px solid rgba(150,205,255,.3);
@@ -331,29 +458,25 @@ canvas{display:block;position:fixed;inset:0}
 #mm-tooltip .mt-quote{font-size:11px;color:#9FC3E8;font-style:italic;line-height:1.5;margin-bottom:10px}
 #mm-tooltip .mt-btn{background:rgba(150,205,255,.12);border:1px solid rgba(150,205,255,.35);
   border-radius:7px;color:#96CDFF;font-size:10px;padding:6px 12px;cursor:pointer;
-  font-family:monospace;pointer-events:auto}
+  font-family:monospace;pointer-events:auto;transition:background .18s}
 #mm-tooltip .mt-btn:hover{background:rgba(150,205,255,.22)}
+#mm-tooltip .mt-btn:focus-visible{outline:none;box-shadow:0 0 0 3px rgba(150,205,255,.35)}
 #mm-legend{position:fixed;bottom:20px;left:20px;background:rgba(4,10,22,.85);
   border:1px solid rgba(255,255,255,.08);border-radius:10px;padding:11px 13px;
   font-size:10px;font-family:monospace;z-index:270;max-height:40vh;overflow-y:auto}
-#mm-legend .ml-item{display:flex;align-items:center;gap:6px;margin-bottom:4px}
+#mm-legend .ml-item{display:flex;align-items:center;gap:6px;margin-bottom:4px;cursor:pointer;
+  padding:2px 4px;border-radius:4px;transition:background .15s}
+#mm-legend .ml-item:hover{background:rgba(255,255,255,.06)}
 #mm-legend .ml-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
-#mm-hint{position:fixed;bottom:20px;right:20px;font-size:10px;color:#201A34;
+#mm-hint{position:fixed;bottom:20px;right:20px;font-size:10px;color:#6B7FA0;
   font-family:monospace;z-index:270;text-align:right;line-height:1.6}
 
 /* ══════════════════════════════════════════════════════════════════
    KNOWLEDGE GALAXY VIEW — Sternenkarten-Overlay, unabhängig vom 3D-Baum
    ══════════════════════════════════════════════════════════════════ */
-#gx-overlay{position:fixed;inset:0;background:#00000A;z-index:260;
+#gx-overlay{position:fixed;inset:0;background:#03050A;z-index:260;
   opacity:0;pointer-events:none;transition:opacity .4s}
 #gx-overlay.show{opacity:1;pointer-events:auto}
-#gx-close{position:absolute;top:58px;right:20px;background:rgba(255,255,255,.05);
-  border:1px solid rgba(150,205,255,.25);border-radius:8px;color:#9FC3E8;font-size:16px;
-  width:34px;height:34px;cursor:pointer;line-height:1;z-index:270}
-#gx-close:hover{color:#96CDFF;border-color:#96CDFF}
-#gx-title{position:fixed;top:58px;left:50%;transform:translateX(-50%);
-  font-size:10px;letter-spacing:4px;color:#4A7BA8;font-family:monospace;
-  text-transform:uppercase;z-index:270;pointer-events:none;text-align:center}
 #gx-svg{position:absolute;inset:0;width:100%;height:100%;cursor:grab}
 #gx-svg.dragging{cursor:grabbing}
 #gx-tooltip{position:fixed;background:rgba(4,10,22,.97);border:1px solid rgba(150,205,255,.3);
@@ -366,20 +489,22 @@ canvas{display:block;position:fixed;inset:0}
 #gx-tooltip .gt-quote{font-size:11px;color:#9FC3E8;font-style:italic;line-height:1.5;margin-bottom:10px}
 #gx-tooltip .gt-btn{background:rgba(150,205,255,.12);border:1px solid rgba(150,205,255,.35);
   border-radius:7px;color:#96CDFF;font-size:10px;padding:6px 12px;cursor:pointer;
-  font-family:monospace;pointer-events:auto}
+  font-family:monospace;pointer-events:auto;transition:background .18s}
 #gx-tooltip .gt-btn:hover{background:rgba(150,205,255,.22)}
+#gx-tooltip .gt-btn:focus-visible{outline:none;box-shadow:0 0 0 3px rgba(150,205,255,.35)}
 #gx-clusters{position:fixed;bottom:20px;left:20px;background:rgba(4,10,22,.85);
   border:1px solid rgba(255,255,255,.08);border-radius:10px;padding:11px 13px;
   font-size:10px;font-family:monospace;z-index:270;max-height:44vh;overflow-y:auto}
 #gx-clusters .gc-item{display:flex;align-items:center;gap:6px;margin-bottom:4px;cursor:pointer}
 #gx-clusters .gc-item:hover{opacity:0.7}
 #gx-clusters .gc-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
-#gx-hint{position:fixed;bottom:20px;right:20px;font-size:10px;color:#201A34;
+#gx-hint{position:fixed;bottom:20px;right:20px;font-size:10px;color:#6B7FA0;
   font-family:monospace;z-index:270;text-align:right;line-height:1.6}
 #gx-search{position:fixed;top:58px;left:20px;z-index:270;background:rgba(4,10,22,.85);
   border:1px solid rgba(150,205,255,.22);border-radius:20px;padding:7px 14px;
-  font-size:11px;color:#C8E1FF;font-family:monospace;width:200px;outline:none}
-#gx-search::placeholder{color:#241F38}
+  font-size:11px;color:#C8E1FF;font-family:monospace;width:200px;outline:none;transition:box-shadow .2s,border-color .2s}
+#gx-search:focus{border-color:#96CDFF;box-shadow:0 0 0 3px rgba(150,205,255,.25)}
+#gx-search::placeholder{color:#4A5570}
 
 /* ══════════════════════════════════════════════════════════════════
    LERNKARTEN (FLASHCARDS) — Overlay, generiert aus Ideen/Zitaten/Werken
@@ -388,19 +513,13 @@ canvas{display:block;position:fixed;inset:0}
   z-index:260;display:flex;flex-direction:column;align-items:center;justify-content:center;
   padding:70px 20px 40px;opacity:0;pointer-events:none;transition:opacity .35s}
 #fc-overlay.show{opacity:1;pointer-events:auto}
-#fc-close{position:absolute;top:58px;right:20px;background:rgba(255,255,255,.05);
-  border:1px solid rgba(150,205,255,.25);border-radius:8px;color:#9FC3E8;font-size:16px;
-  width:34px;height:34px;cursor:pointer;line-height:1}
-#fc-close:hover{color:#96CDFF;border-color:#96CDFF}
-#fc-title{position:fixed;top:58px;left:50%;transform:translateX(-50%);
-  font-size:10px;letter-spacing:4px;color:#4A7BA8;font-family:monospace;
-  text-transform:uppercase;pointer-events:none}
 
 #fc-filterbar{display:flex;gap:6px;margin-bottom:22px;flex-wrap:wrap;justify-content:center;max-width:640px}
 .fc-filter{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);
   border-radius:16px;color:#9FC3E8;font-size:10px;padding:5px 13px;cursor:pointer;
   font-family:monospace;transition:all .18s}
 .fc-filter:hover{border-color:rgba(150,205,255,.35)}
+.fc-filter:focus-visible{outline:none;box-shadow:0 0 0 3px rgba(150,205,255,.35)}
 .fc-filter.active{background:rgba(150,205,255,.14);border-color:#96CDFF;color:#C8E1FF}
 
 #fc-scene{perspective:1400px;width:min(480px,88vw);height:280px;margin-bottom:24px}
@@ -411,21 +530,28 @@ canvas{display:block;position:fixed;inset:0}
   padding:28px 26px;display:flex;flex-direction:column;align-items:center;justify-content:center;
   text-align:center;box-shadow:0 24px 60px rgba(0,0,0,.5)}
 .fc-front{background:rgba(6,12,22,.95);border:1px solid rgba(150,205,255,.28)}
-.fc-back{background:rgba(6,12,22,.97);border:1px solid rgba(0,255,150,.28);transform:rotateY(180deg)}
+.fc-back{background:rgba(6,12,22,.97);border:1px solid rgba(255,190,120,.35);
+  transform:rotateY(180deg);
+  box-shadow:0 24px 60px rgba(0,0,0,.5),0 0 40px rgba(255,190,120,.08)}
 .fc-kicker{font-size:10px;letter-spacing:2.5px;text-transform:uppercase;margin-bottom:16px;font-family:monospace}
-.fc-question{font-size:17px;font-weight:600;color:#DCE9FF;line-height:1.5;font-family:'Inter',serif}
-.fc-answer-name{font-size:20px;font-weight:900;margin-bottom:8px}
+.fc-question{font-size:17px;font-weight:600;color:#DCE9FF;line-height:1.5;font-family:'Fraunces',Georgia,serif;font-style:italic}
+.fc-answer-name{font-size:20px;font-weight:700;margin-bottom:8px;color:#FFBE78;font-family:'Fraunces',Georgia,serif;font-style:italic}
 .fc-answer-detail{font-size:13.5px;color:#9FC3E8;line-height:1.6}
-.fc-hint{position:absolute;bottom:14px;font-size:10px;color:#28203C;font-family:monospace;letter-spacing:1px}
+.fc-hint{position:absolute;bottom:14px;font-size:10px;color:#4A4560;font-family:monospace;letter-spacing:1px}
 
 #fc-controls{display:flex;align-items:center;gap:16px}
 .fc-btn{background:rgba(255,255,255,.05);border:1px solid rgba(150,205,255,.25);
   border-radius:10px;color:#96CDFF;font-size:13.5px;padding:10px 20px;cursor:pointer;
   font-family:monospace;transition:all .18s}
 .fc-btn:hover{background:rgba(150,205,255,.12)}
+.fc-btn:focus-visible{outline:none;box-shadow:0 0 0 3px rgba(150,205,255,.35)}
 .fc-btn:disabled{opacity:.3;cursor:default}
 .fc-know-btns{display:flex;gap:8px}
-.fc-know{border-radius:10px;padding:10px 18px;font-size:11px;font-family:monospace;cursor:pointer;border:1px solid}
+.fc-know{border-radius:10px;padding:10px 18px;font-size:11px;font-family:monospace;cursor:pointer;
+  border:1px solid;transition:background .18s,transform .15s}
+.fc-know:hover{transform:translateY(-1px)}
+.fc-know:active{transform:translateY(0)}
+.fc-know:focus-visible{outline:none;box-shadow:0 0 0 3px rgba(150,205,255,.35)}
 .fc-know-no{background:rgba(248,113,113,.08);border-color:rgba(248,113,113,.35);color:#F87171}
 .fc-know-no:hover{background:rgba(248,113,113,.18)}
 .fc-know-yes{background:rgba(74,222,128,.08);border-color:rgba(74,222,128,.35);color:#6FA06F}
@@ -433,24 +559,16 @@ canvas{display:block;position:fixed;inset:0}
 #fc-counter{font-size:11px;color:#4A7BA8;font-family:monospace;margin-top:16px}
 #fc-progress-track{width:min(480px,88vw);height:3px;background:rgba(255,255,255,.08);
   border-radius:2px;margin-top:10px}
-#fc-progress-fill{height:100%;background:linear-gradient(90deg,#96CDFF,#96CDFF);
+#fc-progress-fill{height:100%;background:linear-gradient(90deg,#4A7BA8,#96CDFF 60%,#FFBE78);
   border-radius:2px;transition:width .4s}
 @media(max-width:560px){#fc-scene{height:320px}.fc-question{font-size:15px}}
 
 /* ══════════════════════════════════════════════════════════════════
    GEO-KARTE — Wirkungsorte-Overlay, unabhängig vom 3D-Baum
    ══════════════════════════════════════════════════════════════════ */
-#geo-overlay{position:fixed;inset:0;background:#0a0e14;z-index:260;
+#geo-overlay{position:fixed;inset:0;background:#03050A;z-index:260;
   opacity:0;pointer-events:none;transition:opacity .4s}
 #geo-overlay.show{opacity:1;pointer-events:auto}
-#geo-close{position:absolute;top:58px;right:20px;background:rgba(255,255,255,.08);
-  border:1px solid rgba(150,205,255,.3);border-radius:8px;color:#9FC3E8;font-size:16px;
-  width:34px;height:34px;cursor:pointer;line-height:1;z-index:1000}
-#geo-close:hover{color:#96CDFF;border-color:#96CDFF}
-#geo-title{position:fixed;top:58px;left:50%;transform:translateX(-50%);
-  font-size:10px;letter-spacing:4px;color:#9FC3E8;font-family:monospace;
-  text-transform:uppercase;z-index:1000;pointer-events:none;background:rgba(10,14,20,.8);
-  padding:6px 16px;border-radius:20px}
 #geo-map{position:absolute;inset:0;width:100%;height:100%}
 #geo-map .leaflet-tile-pane{filter:invert(1) hue-rotate(180deg) brightness(0.85) contrast(1.05) saturate(0.6)}
 .geo-marker{border-radius:50%;border:2px solid #fff;box-shadow:0 0 12px currentColor;cursor:pointer}
@@ -459,13 +577,14 @@ canvas{display:block;position:fixed;inset:0}
 .geo-popup .leaflet-popup-tip{background:rgba(6,12,22,.97)}
 .geo-popup .leaflet-popup-content{margin:14px 16px;font-family:'Inter',sans-serif}
 .gp-era{font-size:10px;letter-spacing:2px;text-transform:uppercase;margin-bottom:4px;font-family:monospace}
-.gp-name{font-size:15px;font-weight:900;margin-bottom:2px}
+.gp-name{font-size:16px;font-weight:600;margin-bottom:2px;font-family:'Fraunces',Georgia,serif;font-style:italic}
 .gp-place{font-size:11px;color:#9FC3E8;font-family:monospace;margin-bottom:8px}
 .gp-quote{font-size:11px;color:#9FC3E8;font-style:italic;line-height:1.5;margin-bottom:10px}
 .gp-btn{background:rgba(150,205,255,.14);border:1px solid rgba(150,205,255,.4);
   border-radius:6px;color:#96CDFF;font-size:10px;padding:5px 11px;cursor:pointer;
-  font-family:monospace;text-decoration:none;display:inline-block}
+  font-family:monospace;text-decoration:none;display:inline-block;transition:background .18s,border-color .18s}
 .gp-btn:hover{background:rgba(150,205,255,.24)}
+.gp-btn:focus-visible{outline:none;box-shadow:0 0 0 3px rgba(150,205,255,.35)}
 #geo-legend{position:fixed;bottom:20px;left:20px;background:rgba(6,12,22,.9);
   border:1px solid rgba(255,255,255,.1);border-radius:10px;padding:11px 13px;
   font-size:10px;font-family:monospace;z-index:1000;max-height:40vh;overflow-y:auto}
@@ -481,13 +600,6 @@ canvas{display:block;position:fixed;inset:0}
 #kg-overlay{position:fixed;inset:0;background:rgba(0,2,10,.95);backdrop-filter:blur(10px);
   z-index:260;opacity:0;pointer-events:none;transition:opacity .35s}
 #kg-overlay.show{opacity:1;pointer-events:auto}
-#kg-close{position:absolute;top:58px;right:20px;background:rgba(255,255,255,.05);
-  border:1px solid rgba(150,205,255,.25);border-radius:8px;color:#9FC3E8;font-size:16px;
-  width:34px;height:34px;cursor:pointer;line-height:1;z-index:280}
-#kg-close:hover{color:#96CDFF;border-color:#96CDFF}
-#kg-title{position:fixed;top:58px;left:50%;transform:translateX(-50%);
-  font-size:10px;letter-spacing:4px;color:#4A7BA8;font-family:monospace;
-  text-transform:uppercase;z-index:270;pointer-events:none;text-align:center}
 #kg-svg{position:absolute;inset:0;width:100%;height:100%;cursor:grab}
 #kg-svg.dragging{cursor:grabbing}
 
@@ -496,22 +608,26 @@ canvas{display:block;position:fixed;inset:0}
 #kg-intro h3{font-size:20px;font-weight:900;color:#C8E1FF;text-shadow:0 0 16px #96CDFF88}
 #kg-intro p{font-size:13.5px;color:#9FC3E8;max-width:440px;line-height:1.65}
 #kg-run-btn{background:#96CDFF;border:none;border-radius:12px;color:#1A1522;
-  font-weight:700;font-size:13.5px;padding:13px 30px;cursor:pointer;font-family:monospace}
-#kg-run-btn:hover{box-shadow:0 0 26px rgba(150,205,255,.5)}
+  font-weight:700;font-size:13.5px;padding:13px 32px;cursor:pointer;font-family:monospace;
+  transition:box-shadow .2s,transform .15s}
+#kg-run-btn:hover{box-shadow:0 0 26px rgba(150,205,255,.5);transform:translateY(-1px)}
+#kg-run-btn:active{transform:translateY(0)}
+#kg-run-btn:focus-visible{outline:none;box-shadow:0 0 0 3px rgba(150,205,255,.4)}
 #kg-status{font-size:11px;color:#4A7BA8;font-family:monospace}
 #kg-progress-track{width:min(360px,80vw);height:4px;background:rgba(255,255,255,.08);
   border-radius:2px;overflow:hidden}
-#kg-progress-fill{height:100%;width:0%;background:linear-gradient(90deg,#96CDFF,#96CDFF);
+#kg-progress-fill{height:100%;width:0%;background:linear-gradient(90deg,#4A7BA8,#96CDFF 60%,#FFBE78);
   transition:width .3s}
 #kg-error{color:#F87171;font-size:11px;max-width:420px;line-height:1.6;font-family:monospace;
   background:rgba(248,113,113,.08);border:1px solid rgba(248,113,113,.25);border-radius:10px;
   padding:14px 18px;text-align:left;display:none}
 
-#kg-tooltip{position:fixed;background:rgba(4,10,22,.97);border:1px solid rgba(0,255,150,.3);
+#kg-tooltip{position:fixed;background:rgba(4,10,22,.97);border:1px solid rgba(150,205,255,.3);
   border-radius:12px;padding:16px 18px;max-width:290px;z-index:280;pointer-events:none;
   opacity:0;transition:opacity .18s;box-shadow:0 16px 40px rgba(0,0,0,.5)}
 #kg-tooltip.show{opacity:1}
-#kg-tooltip .kt-name{font-size:15px;font-weight:900;margin-bottom:4px}
+#kg-tooltip .kt-name{font-size:17px;font-weight:600;margin-bottom:4px;color:#DCE9FF;
+  font-family:'Fraunces',Georgia,serif;font-style:italic}
 #kg-tooltip .kt-link{font-size:11px;color:#96CDFF;font-family:monospace;margin-bottom:2px;
   display:flex;justify-content:space-between}
 #kg-legend{position:fixed;bottom:20px;left:20px;background:rgba(4,10,22,.85);
@@ -522,30 +638,90 @@ canvas{display:block;position:fixed;inset:0}
   border:1px solid rgba(150,205,255,.25);border-radius:8px;color:#9FC3E8;font-size:10px;
   padding:7px 13px;cursor:pointer;font-family:monospace;z-index:270}
 #kg-recompute:hover{color:#96CDFF;border-color:#96CDFF}
+
+/* Konsolidierte Close-Buttons — vorher 6 fast identische Einzelregeln ohne Transition */
+#quiz-close,#mm-close,#gx-close,#fc-close,#geo-close,#kg-close{
+  position:absolute;top:58px;right:20px;width:34px;height:34px;line-height:1;
+  background:rgba(255,255,255,.05);border:1px solid rgba(150,205,255,.25);border-radius:10px;
+  color:#9FC3E8;font-size:16px;cursor:pointer;
+  transition:color .18s,border-color .18s,background .18s,transform .18s;
+}
+#mm-close,#gx-close{z-index:270}
+#geo-close{z-index:1000}
+#kg-close{z-index:280}
+#quiz-close:hover,#mm-close:hover,#gx-close:hover,#fc-close:hover,#geo-close:hover,#kg-close:hover{
+  color:#96CDFF;border-color:#96CDFF;background:rgba(150,205,255,.1);transform:scale(1.06);
+}
+#quiz-close:active,#mm-close:active,#gx-close:active,#fc-close:active,#geo-close:active,#kg-close:active{
+  transform:scale(0.94);
+}
+#quiz-close:focus-visible,#mm-close:focus-visible,#gx-close:focus-visible,#fc-close:focus-visible,#geo-close:focus-visible,#kg-close:focus-visible{
+  outline:none;box-shadow:0 0 0 3px rgba(150,205,255,.35);
+}
+#philosophy-intro{position:fixed;inset:0;z-index:500;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;text-align:center;padding:24px;
+  background:#03050A;cursor:pointer;transition:opacity .7s ease;opacity:1}
+#philosophy-intro.leaving{opacity:0;pointer-events:none}
+#philosophy-intro .pi-tree{font-family:'Fraunces',Georgia,serif;font-style:italic;color:#FFBE78;
+  font-size:26px;margin-bottom:22px}
+#philosophy-intro .pi-main{font-family:'Fraunces',Georgia,serif;font-style:italic;color:#DCE9FF;
+  font-size:clamp(20px,4vw,28px);line-height:1.35;margin-bottom:14px}
+#philosophy-intro .pi-sub{font-family:'Fraunces',Georgia,serif;font-style:italic;color:#9FC3E8;
+  font-size:15px;margin-bottom:22px}
+#philosophy-intro .pi-tag{font-family:monospace;font-size:11px;color:#96CDFF;letter-spacing:.5px}
+#philosophy-intro .pi-hint{position:absolute;bottom:32px;font-family:monospace;font-size:10px;
+  letter-spacing:.22em;text-transform:uppercase;color:#4A7BA8}
 @media (prefers-reduced-motion: reduce){
   *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important;scroll-behavior:auto!important}
+  #philosophy-intro{transition-duration:.01ms!important}
 }
+
+/* Vereinheitlichter Titel-Chip für alle 5 Overlay-Ansichten — hebt sich von
+   belebtem Inhalt (SVG-Netzwerke, Karte, 3D-Karten) klar ab statt frei zu schweben */
+#mm-title,#gx-title,#fc-title,#geo-title,#kg-title{
+  position:fixed;top:58px;left:50%;transform:translateX(-50%);
+  font-size:10px;letter-spacing:4px;color:#9FC3E8;font-family:monospace;
+  text-transform:uppercase;pointer-events:none;text-align:center;
+  background:rgba(10,14,22,.82);padding:7px 18px;border-radius:20px;
+  border:1px solid rgba(150,205,255,.15);backdrop-filter:blur(6px);
+  max-width:90vw;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+#mm-title,#gx-title,#kg-title{z-index:270}
+#geo-title{z-index:1000}
 </style>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 </head>
 <body>
-<div id="loading"><div class="sp"></div><p>TREE OF KNOWLEDGE</p><div class="progress"><div class="progress-bar" id="load-bar"></div></div></div>
+<div class="noise-layer" aria-hidden="true"></div>
+<p class="sr-only">
+  Tree of Knowledge zeigt 35 Philosophen als interaktive 3D-Visualisierung. Diese Darstellung ist
+  primär visuell. Nutze das Suchfeld oben (durchsucht Name, Epoche und Ideen) oder die
+  Schnellzugriff-Punkte am linken Bildschirmrand, um einzelne Philosophen direkt und tastaturbedienbar
+  zu erreichen — beide öffnen die Detailansicht mit vollständigem Text zu Biografie, Zitat und Werken.
+</p>
+<div id="loading">
+  <svg id="load-skeleton" viewBox="0 0 1000 460" aria-hidden="true">
+    <rect x="470" y="380" width="60" height="80" fill="#161b2c" rx="8" opacity="0.6"/>
+  </svg>
+  <div class="sp"></div><p>TREE OF KNOWLEDGE</p><div class="progress"><div class="progress-bar" id="load-bar"></div></div>
+</div>
 <div id="crosshair"></div>
 
 <!-- ══════════════ HEADER: Marke, Suche, Werkzeuge — alles in einer Reihe ══════════════ -->
 <header id="header-bar">
-  <div id="header-brand"><span class="dot"></span><span class="full">TREE OF KNOWLEDGE</span></div>
+  <h1 id="header-brand" style="margin:0"><span class="dot"></span><span class="full">TREE OF KNOWLEDGE</span></h1>
   <div id="header-search-wrap">
     <span class="icon">⌕</span>
-    <input id="search-box" type="text" placeholder="Philosoph, Epoche oder Idee suchen…" autocomplete="off"/>
+    <input id="search-box" type="text" placeholder="Philosoph, Epoche oder Idee suchen…" aria-label="Philosoph, Epoche oder Idee suchen" autocomplete="off"/>
     <div id="search-results"></div>
   </div>
   <div id="header-tools">
+    <button class="hbtn" id="kg-btn" onclick="openKnowledgeGraph()">🧠 <span class="lbl">Wissensgraph</span></button>
     <button class="hbtn" id="geo-btn" onclick="openGeoMap()">🗺 <span class="lbl">Karte</span></button>
-    <button class="hbtn" id="fc-btn" onclick="openFlashcards()"> <span class="lbl">Lernkarten</span></button>
+    <button class="hbtn" id="fc-btn" onclick="openFlashcards()">🎓 <span class="lbl">Lernkarten</span></button>
     <button class="hbtn" id="gx-btn" onclick="openGalaxy()">🌌 <span class="lbl">Galaxy</span></button>
-    <button class="hbtn" id="mm-btn" onclick="openMindMap()"> <span class="lbl">Mind Map</span></button>
-    <button class="hbtn" id="quiz-btn" onclick="openQuiz()"> <span class="lbl">Quiz</span></button>
+    <button class="hbtn" id="mm-btn" onclick="openMindMap()">🕸 <span class="lbl">Mind Map</span></button>
+    <button class="hbtn" id="quiz-btn" onclick="openQuiz()">🎮 <span class="lbl">Quiz</span></button>
   </div>
 </header>
 
@@ -553,6 +729,8 @@ canvas{display:block;position:fixed;inset:0}
 <footer id="footer-bar">
   <div id="footer-left">
     <button class="hbtn" id="tl-toggle" onclick="toggleTimeline()">⏱ <span class="lbl">Zeitleiste</span></button>
+    <button class="hbtn" id="cmp-toggle" onclick="openCompare()">⚖ <span class="lbl">Vergleich</span></button>
+    <button class="hbtn" onclick="discoverRandom()" title="Zufälligen Philosophen entdecken (R)">🎲 <span class="lbl">Zufall</span></button>
   </div>
 
   </footer>
@@ -560,9 +738,13 @@ canvas{display:block;position:fixed;inset:0}
 <div id="timeline-bar">
   <label>ZEITLEISTE DER PHILOSOPHIE</label>
   <div class="row">
-    <span style="font-size:10px;color:#1D1830;font-family:monospace">600 v.Chr.</span>
-    <input id="tl-slider" type="range" min="-600" max="2002" value="-600"/>
-    <span style="font-size:10px;color:#1D1830;font-family:monospace">2000</span>
+    <button id="tl-play" onclick="tlTogglePlay()" title="Durch die Zeit abspielen">▶</button>
+    <span style="font-size:10px;color:#6B7FA0;font-family:monospace">600 v.Chr.</span>
+    <div id="tl-track-wrap">
+      <input id="tl-slider" type="range" min="-600" max="2002" value="-600"/>
+      <div id="tl-marks"></div>
+    </div>
+    <span style="font-size:10px;color:#6B7FA0;font-family:monospace">2000</span>
     <span id="tl-year">— v.Chr.</span>
   </div>
   <div class="row" style="margin-top:6px"><span id="tl-name"></span></div>
@@ -579,6 +761,7 @@ canvas{display:block;position:fixed;inset:0}
 
 <div id="locked-hint">KLICK ZUM ENTSPERREN · ESC</div>
 <div id="sidebar">
+  <div id="sb-spotlight" aria-hidden="true"></div>
   <button class="sb-close" onclick="closeSB()">✕</button>
   <div id="sb-content"></div>
 </div>
@@ -586,6 +769,43 @@ canvas{display:block;position:fixed;inset:0}
 <div id="intro-title">
   <h1>TREE OF KNOWLEDGE</h1>
   <p>PHILOSOPHIE ALS LEBENDIGES UNIVERSUM</p>
+</div>
+
+<div id="philosophy-intro" onclick="dismissPhilosophyIntro()">
+  <div class="pi-tree">🌳</div>
+  <p class="pi-main">
+    <span class="kinetic-word" style="animation-delay:0s">Wissen</span>
+    <span class="kinetic-word" style="animation-delay:.09s">ist</span>
+    <span class="kinetic-word" style="animation-delay:.18s">kein</span>
+    <span class="kinetic-word" style="animation-delay:.27s">Ziel,</span><br/>
+    <span class="kinetic-word" style="animation-delay:.55s">sondern</span>
+    <span class="kinetic-word" style="animation-delay:.64s">eine</span>
+    <span class="kinetic-word" style="animation-delay:.73s">Reise.</span>
+  </p>
+  <p class="pi-sub">Jede Frage eröffnet neue Perspektiven.</p>
+  <p class="pi-tag">Tree of Knowledge lädt dich ein, Philosophie interaktiv zu erleben.</p>
+  <p class="pi-hint">zum Beginnen tippen oder warten</p>
+</div>
+
+<button id="cmp-pill" onclick="openCompare()">⚖ Vergleich anzeigen</button>
+
+<div id="cmp-overlay" onclick="if(event.target===this)closeCompare()">
+  <div id="cmp-box">
+    <div class="cmp-head">
+      <span class="cmp-head-title">⚖ Vergleich</span>
+      <div style="margin-left:auto;display:flex;gap:8px">
+        <button class="gp-btn" onclick="resetCompare()" style="text-decoration:none">Zurücksetzen</button>
+        <button class="gp-btn" onclick="closeCompare()" style="text-decoration:none">✕</button>
+      </div>
+    </div>
+    <div class="cmp-pickers">
+      <div class="cmp-picker" id="cmp-picker-0"></div>
+      <div class="cmp-picker" id="cmp-picker-1"></div>
+    </div>
+    <div class="cmp-relation" id="cmp-relation"></div>
+    <div id="cmp-empty-hint" class="cmp-empty-hint">Wähle zwei Philosophen aus, um sie Ebene für Ebene zu vergleichen.</div>
+    <div class="cmp-table" id="cmp-table"></div>
+  </div>
 </div>
 
 <!-- ══════════════ QUIZ-OVERLAY (unabhängig vom 3D-Baum) ══════════════ -->
@@ -643,20 +863,20 @@ canvas{display:block;position:fixed;inset:0}
 <!-- ══════════════ LERNKARTEN OVERLAY (unabhängig vom 3D-Baum) ══════════════ -->
 <div id="fc-overlay">
   <button id="fc-close" onclick="closeFlashcards()" title="Lernkarten schließen (ESC)">✕</button>
-  <div id="fc-title">LERNKARTEN · KLICK ZUM UMDREHEN · ← → ZUM BLÄTTERN</div>
+  <div id="fc-title">LERNKARTEN · ← → BLÄTTERN · LEERTASTE UMDREHEN · J/N BEWERTEN</div>
   <div id="fc-filterbar"></div>
   <div id="fc-scene">
     <div id="fc-card" onclick="fcFlip()">
       <div class="fc-face fc-front">
         <div class="fc-kicker" id="fc-kicker-f"></div>
         <div class="fc-question" id="fc-question"></div>
-        <div class="fc-hint">Klicken zum Umdrehen</div>
+        <div class="fc-hint">Klicken oder Leertaste zum Umdrehen</div>
       </div>
       <div class="fc-face fc-back">
-        <div class="fc-kicker" id="fc-kicker-b">ANTWORT</div>
+        <div class="fc-kicker" id="fc-kicker-b" style="color:#FFBE78">ANTWORT</div>
         <div class="fc-answer-name" id="fc-answer-name"></div>
         <div class="fc-answer-detail" id="fc-answer-detail"></div>
-        <div class="fc-hint">Klicken zum Zurückdrehen</div>
+        <div class="fc-hint">J = weiß ich · N = nochmal üben</div>
       </div>
     </div>
   </div>
@@ -708,6 +928,26 @@ canvas{display:block;position:fixed;inset:0}
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script>
+// ─── SKELETON-LADEANSICHT befüllen (sofort, unabhängig von Three.js-Init) ────
+(function buildLoadSkeleton(){
+  const svg=document.getElementById('load-skeleton');
+  if(!svg) return;
+  const nodes=[
+    {x:500,y:60},{x:420,y:90},{x:580,y:90},{x:350,y:130},
+    {x:460,y:120},{x:540,y:120},{x:650,y:130},{x:300,y:180},
+    {x:390,y:170},{x:500,y:160},{x:610,y:170},{x:700,y:180},
+    {x:260,y:240},{x:350,y:230},{x:440,y:220},{x:560,y:220},
+    {x:650,y:230},{x:740,y:240},{x:320,y:300},{x:420,y:290},
+    {x:580,y:290},{x:680,y:300}
+  ];
+  let html='';
+  nodes.forEach((n,i)=>{
+    html+=`<line x1="500" y1="420" x2="${n.x}" y2="${n.y}" stroke="#161b2c" stroke-width="1" opacity="0.4"/>`;
+    html+=`<circle class="load-skel-dot" cx="${n.x}" cy="${n.y}" r="9" fill="#1e2540" style="animation-delay:${(i%8)*0.1}s"/>`;
+  });
+  svg.insertAdjacentHTML('beforeend', html);
+})();
+
 // ─── WebGL-Verfügbarkeit prüfen ──────────────────────────────────────────────
 (function checkWebGL(){
   try{
@@ -822,6 +1062,8 @@ renderer.setPixelRatio(Math.min(devicePixelRatio,2));
 renderer.setSize(innerWidth,innerHeight);
 renderer.sortObjects=true;
 document.body.appendChild(renderer.domElement);
+renderer.domElement.setAttribute('aria-hidden','true');
+renderer.domElement.setAttribute('role','presentation');
 
 const scene=new THREE.Scene();
 scene.background=new THREE.Color(0x000005);
@@ -1308,7 +1550,7 @@ function openSB(p){
   const myToken=++sbToken;
   document.getElementById('sb-content').innerHTML=`
     <div id="sb-img" style="margin-bottom:16px;border-radius:10px;overflow:hidden;position:relative;aspect-ratio:16/10;background:linear-gradient(135deg,${col}12,#000a1a);display:flex;align-items:center;justify-content:center">
-      <span style="font-size:10px;color:#1D1830;font-family:monospace;letter-spacing:2px">LÄDT PORTRÄT…</span>
+      <span style="font-size:10px;color:#6B7FA0;font-family:monospace;letter-spacing:2px">LÄDT PORTRÄT…</span>
     </div>
     <div style="display:flex;align-items:flex-start;gap:14px;margin-bottom:6px">
       <div class="tok-initial" style="font-size:48px;font-style:italic;line-height:.85;flex-shrink:0;color:${col};text-shadow:0 0 22px ${col}66;user-select:none">${p.name.charAt(0)}</div>
@@ -1319,8 +1561,10 @@ function openSB(p){
       </div>
     </div>
     <div style="height:1px;width:100%;margin:14px 0 16px;opacity:.4;background:linear-gradient(90deg,${col},transparent)"></div>
-    <div class="sb-quote">»${p.quote}«
-      <button onclick="copyQuote('${p.name.replace(/'/g,"\\'")}','${p.quote.replace(/'/g,"\\'")}')" title="Zitat kopieren" style="background:none;border:none;color:#28203C;cursor:pointer;font-size:11px;float:right;margin-top:-4px">⧉</button>
+    <button id="cmp-btn-${p.id}" onclick="toggleCompare('${p.id}')" class="cmp-toggle-btn">⚖ <span>Vergleichen</span></button>
+    <div class="sb-quote">»${kineticHTML(p.quote, 0.026)}«
+      <button onclick="copyQuote('${p.name.replace(/'/g,"\\'")}','${p.quote.replace(/'/g,"\\'")}')" title="Zitat kopieren" style="background:none;border:none;color:#5A6A8A;cursor:pointer;font-size:11px;float:right;margin-top:-4px">⧉</button>
+      <button onclick="shareQuoteImage('${p.id}')" id="qshare-btn" title="Als Bild teilen" style="background:none;border:none;color:#5A6A8A;cursor:pointer;font-size:11px;float:right;margin-top:-4px;margin-right:6px">🖼</button>
     </div>
     <div class="sb-section">Schlüsselideen</div>
     <div class="sb-ideas">${p.ideas.map(i=>`<span class="sb-tag" style="background:${col}18;border:1px solid ${col}44;color:${col};cursor:pointer" onclick="highlightPhilosophers(PH.filter(x=>x.ideas.includes('${i.replace(/'/g,"\\'")}')).map(x=>x.id))" title="Nach dieser Idee filtern">${i}</span>`).join('')}</div>
@@ -1353,6 +1597,7 @@ function openSB(p){
     <div id="ai-response"></div>
   `;
   document.getElementById('sidebar').classList.add('open');
+  updateCompareUI();
   // Wikipedia-Portrait laden
   if(p.wiki){
     fetch('https://en.wikipedia.org/api/rest_v1/page/summary/'+encodeURIComponent(p.wiki))
@@ -1378,7 +1623,228 @@ function copyQuote(name,quote){
     setTimeout(()=>{btn.textContent=old;btn.style.color='';},1500);
   }).catch(()=>{});
 }
+
+async function shareQuoteImage(id){
+  const p=PHM[id];
+  if(!p) return;
+  const btn=document.getElementById('qshare-btn');
+  const oldTxt=btn?btn.textContent:'';
+  if(btn){ btn.textContent='…'; btn.disabled=true; }
+  try{
+    const size=1080;
+    const canvas=document.createElement('canvas');
+    canvas.width=size; canvas.height=size;
+    const ctx=canvas.getContext('2d');
+    if(document.fonts && document.fonts.ready){ try{ await document.fonts.ready; }catch(e){} }
+
+    ctx.fillStyle='#03050A'; ctx.fillRect(0,0,size,size);
+
+    const glow=ctx.createRadialGradient(size/2,size*0.38,0,size/2,size*0.38,size*0.75);
+    glow.addColorStop(0,p.c+'33'); glow.addColorStop(1,'transparent');
+    ctx.fillStyle=glow; ctx.fillRect(0,0,size,size);
+
+    ctx.fillStyle='rgba(150,205,255,0.35)';
+    for(let i=0;i<60;i++){
+      const x=Math.random()*size, y=Math.random()*size, r=Math.random()*1.3;
+      ctx.beginPath(); ctx.arc(x,y,r,0,Math.PI*2); ctx.fill();
+    }
+
+    ctx.textAlign='center';
+    ctx.fillStyle=p.c;
+    ctx.font="italic 500 160px 'Fraunces', Georgia, serif";
+    ctx.shadowColor=p.c; ctx.shadowBlur=40;
+    ctx.fillText(p.name.charAt(0), size/2, 260);
+    ctx.shadowBlur=0;
+
+    ctx.fillStyle='#DCE9FF';
+    ctx.font="italic 400 52px 'Fraunces', Georgia, serif";
+    const words=('»'+p.quote+'«').split(' ');
+    const maxWidth=size-180, lineHeight=68;
+    let lines=[], cur='';
+    words.forEach(w=>{
+      const test=cur?cur+' '+w:w;
+      if(ctx.measureText(test).width>maxWidth && cur){ lines.push(cur); cur=w; } else { cur=test; }
+    });
+    if(cur) lines.push(cur);
+    let y = size/2 - (lines.length*lineHeight)/2 + 20;
+    lines.forEach(line=>{ ctx.fillText(line, size/2, y); y+=lineHeight; });
+
+    ctx.font="italic 600 40px 'Fraunces', Georgia, serif";
+    ctx.fillStyle=p.c;
+    ctx.fillText(p.name, size/2, size-190);
+
+    ctx.font="400 22px monospace";
+    ctx.fillStyle='#9FC3E8';
+    ctx.fillText(p.era+' · '+p.life, size/2, size-150);
+
+    ctx.font="italic 400 24px 'Fraunces', Georgia, serif";
+    ctx.fillStyle='rgba(150,205,255,0.55)';
+    ctx.fillText('Tree of Knowledge', size/2, size-70);
+
+    const blob = await new Promise(resolve=>canvas.toBlob(resolve,'image/png'));
+    if(!blob) return;
+    const fileName='zitat-'+p.id+'.png';
+    const file=new File([blob],fileName,{type:'image/png'});
+
+    if(navigator.canShare && navigator.canShare({files:[file]})){
+      try{
+        await navigator.share({files:[file], title:p.name+' — Tree of Knowledge', text:'»'+p.quote+'« — '+p.name});
+        return;
+      }catch(e){ /* Abbruch -> Download-Fallback unten */ }
+    }
+    const url=URL.createObjectURL(blob);
+    const a=document.createElement('a');
+    a.href=url; a.download=fileName;
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  } finally {
+    if(btn){ btn.textContent=oldTxt; btn.disabled=false; }
+  }
+}
+
 function closeSB(){document.getElementById('sidebar').classList.remove('open');}
+
+// ─── VERGLEICHSMODUS ──────────────────────────────────────────────────────────
+let compareIds=[null,null];
+let cmpDropdownOpenSlot=null;
+
+function updateCompareUI(){
+  const pill=document.getElementById('cmp-pill');
+  const bothSet = compareIds[0] && compareIds[1];
+  pill.classList.toggle('show', bothSet && !document.getElementById('cmp-overlay').classList.contains('show'));
+  PH.forEach(p=>{
+    const btn=document.getElementById('cmp-btn-'+p.id);
+    if(!btn) return;
+    const active=compareIds.includes(p.id);
+    btn.classList.toggle('active', active);
+    btn.innerHTML = active ? '⚖ <span>Im Vergleich</span>' : '⚖ <span>Vergleichen</span>';
+  });
+}
+
+// Von der Sidebar aus: erstes freies Feld belegen, sonst FIFO ersetzen
+function toggleCompare(id){
+  if(compareIds.includes(id)){
+    compareIds = compareIds.map(x=>x===id?null:x);
+  } else if(!compareIds[0]){
+    compareIds[0]=id;
+  } else if(!compareIds[1]){
+    compareIds[1]=id;
+    renderCompare(); openCompare();
+  } else {
+    compareIds=[compareIds[1], id];
+    renderCompare(); openCompare();
+  }
+  updateCompareUI();
+  renderPickers();
+}
+
+function setCompareSlot(slot,id){
+  compareIds[slot]=id;
+  cmpDropdownOpenSlot=null;
+  renderPickers();
+  renderCompare();
+  updateCompareUI();
+}
+
+function resetCompare(){ compareIds=[null,null]; renderPickers(); renderCompare(); closeCompare(); updateCompareUI(); }
+
+function openCompare(){
+  renderPickers();
+  renderCompare();
+  document.getElementById('cmp-overlay').classList.add('show');
+  updateCompareUI();
+}
+function closeCompare(){
+  document.getElementById('cmp-overlay').classList.remove('show');
+  cmpDropdownOpenSlot=null;
+  updateCompareUI();
+}
+
+function renderPickers(){
+  [0,1].forEach(slot=>{
+    const box=document.getElementById('cmp-picker-'+slot);
+    const id=compareIds[slot];
+    const p=id?PHM[id]:null;
+    if(p && cmpDropdownOpenSlot!==slot){
+      box.innerHTML = `<div class="cmp-picker-chip" onclick="cmpOpenDropdown(${slot})">
+        <span class="cmp-picker-initial" style="color:${p.c}">${p.name.charAt(0)}</span>
+        <span><span class="cmp-picker-name">${p.name}</span><br/><span class="cmp-picker-sub">ändern</span></span>
+      </div>`;
+    } else {
+      const otherPh = compareIds[1-slot];
+      box.innerHTML = `<div class="cmp-picker-list">
+        <input class="cmp-picker-input" id="cmp-search-${slot}" placeholder="Philosoph ${slot===0?'A':'B'} wählen…"
+          oninput="cmpFilterDropdown(${slot}, this.value)" onfocus="cmpOpenDropdown(${slot})"/>
+        <div class="cmp-picker-dropdown" id="cmp-dropdown-${slot}" style="display:${cmpDropdownOpenSlot===slot?'block':'none'}"></div>
+      </div>`;
+      if(cmpDropdownOpenSlot===slot) cmpFilterDropdown(slot,'');
+    }
+  });
+}
+function cmpOpenDropdown(slot){
+  cmpDropdownOpenSlot=slot;
+  renderPickers();
+  const input=document.getElementById('cmp-search-'+slot);
+  if(input) input.focus();
+}
+function cmpFilterDropdown(slot, query){
+  const dd=document.getElementById('cmp-dropdown-'+slot);
+  if(!dd) return;
+  const q=query.trim().toLowerCase();
+  const otherId=compareIds[1-slot];
+  const matches=PH.filter(p=>p.id!==otherId && (!q || p.name.toLowerCase().includes(q))).slice(0,8);
+  dd.style.display='block';
+  dd.innerHTML = matches.length===0
+    ? '<div class="cmp-picker-item" style="cursor:default">Keine Treffer</div>'
+    : matches.map(p=>`<div class="cmp-picker-item" onclick="setCompareSlot(${slot},'${p.id}')">
+        <span class="cpd" style="background:${p.c};box-shadow:0 0 5px ${p.c}"></span>
+        <span>${p.name}</span><span class="cpe">${p.era}</span>
+      </div>`).join('');
+}
+
+function renderCompare(){
+  const a=compareIds[0]?PHM[compareIds[0]]:null, b=compareIds[1]?PHM[compareIds[1]]:null;
+  const rel=document.getElementById('cmp-relation');
+  const hint=document.getElementById('cmp-empty-hint');
+  const table=document.getElementById('cmp-table');
+  if(!a||!b){
+    rel.innerHTML='';
+    hint.style.display='block';
+    table.innerHTML='';
+    return;
+  }
+  hint.style.display='none';
+  const aInfB=(a.inf||[]).includes(b.id);
+  const bInfA=(b.inf||[]).includes(a.id);
+  if(aInfB||bInfA){
+    rel.innerHTML = '<span style="color:#FFBE78">'+(aInfB? a.name+' beeinflusste '+b.name : b.name+' beeinflusste '+a.name)+'</span>';
+  } else if(a.era===b.era){
+    rel.innerHTML = '<span style="color:#7BAE6E">Beide gehören zur Epoche „'+a.era+'"</span>';
+  } else {
+    rel.textContent = Math.abs((a.by||0)-(b.by||0))+' Jahre trennen ihre Geburt';
+  }
+  const row=(label,aHtml,bHtml)=>`<div class="cmp-row">
+    <div class="cmp-row-label">${label}</div><div>${aHtml}</div><div>${bHtml}</div>
+  </div>`;
+  const tags=(p)=>`<div class="cmp-tags">${p.ideas.map(i=>`<span class="cmp-tag" style="background:${p.c}1a;color:${p.c};border:1px solid ${p.c}44">${i}</span>`).join('')}</div>`;
+  const works=(p)=> p.works&&p.works.length ? p.works.map(w=>`<div class="cmp-work">${w}</div>`).join('') : '<span style="color:#4A5570;font-size:12px">—</span>';
+  table.innerHTML =
+    row('Name', `<span class="cmp-row-name" style="color:${a.c}">${a.name}</span>`, `<span class="cmp-row-name" style="color:${b.c}">${b.name}</span>`) +
+    row('Epoche', a.era, b.era) +
+    row('Lebensdaten', `<span style="font-family:monospace;color:#9FC3E8">${a.life}</span>`, `<span style="font-family:monospace;color:#9FC3E8">${b.life}</span>`) +
+    row('Zitat', `<span class="cmp-row-quote">„${a.quote}"</span>`, `<span class="cmp-row-quote">„${b.quote}"</span>`) +
+    row('Ideen', tags(a), tags(b)) +
+    row('Werke', works(a), works(b));
+}
+
+document.addEventListener('keydown', e=>{
+  if(e.key==='Escape' && document.getElementById('cmp-overlay').classList.contains('show')) closeCompare();
+});
+document.addEventListener('click', e=>{
+  if(cmpDropdownOpenSlot===null) return;
+  const box=document.getElementById('cmp-picker-'+cmpDropdownOpenSlot);
+  if(box && !box.contains(e.target)){ cmpDropdownOpenSlot=null; renderPickers(); }
+});
 
 // ─── RESIZE ──────────────────────────────────────────────────────────────────
 window.addEventListener('resize',()=>{
@@ -1565,11 +2031,15 @@ const tlSlider=document.getElementById('tl-slider');
 const tlYear=document.getElementById('tl-year');
 const tlName=document.getElementById('tl-name');
 
+tlSlider.addEventListener('pointerdown',()=>{ if(tlPlaying) tlTogglePlay(); });
 tlSlider.addEventListener('input',e=>{
   timelineYear=parseInt(e.target.value);
   const yr=timelineYear<0?Math.abs(timelineYear)+' v.Chr.':timelineYear+' n.Chr.';
   tlYear.textContent=yr;
   tlHighlightActiveEra(timelineYear);
+  document.querySelectorAll('.tl-mark').forEach(el=>{
+    el.classList.toggle('tl-mark-future', PHM[el.dataset.id] && (PHM[el.dataset.id].by||0)>timelineYear);
+  });
   // Zeige alle Philosophen bis zu diesem Jahr
   const active=PH.filter(p=>(p.by||0)<=timelineYear);
   const newest=active[active.length-1];
@@ -1610,11 +2080,9 @@ const TL_ERAS = (()=>{
   const list=Object.values(byEra).sort((a,b)=>a.min-b.min);
   // Lücken schließen: jede Epoche reicht bis zum Start der nächsten (chronologisch lückenlos)
   list.forEach((e,i)=>{
-    e.start = i===0 ? TL_MIN : list[i-1].end;
-    e.end   = i===list.length-1 ? TL_MAX : null;
+    e.start = i===0 ? TL_MIN : e.min;
+    e.end   = i===list.length-1 ? TL_MAX : list[i+1].min;
   });
-  for(let i=0;i<list.length-1;i++){ list[i].end = list[i+1].start; }
-  list[list.length-1].end = TL_MAX;
   return list;
 })();
 
@@ -1629,6 +2097,46 @@ function tlBuildEraBar(){
   }).join('');
 }
 tlBuildEraBar(); // Epochen sofort sichtbar, nicht erst nach dem Öffnen
+
+// ─── PHILOSOPHEN-MARKER auf dem Regler ──────────────────────────────────────
+// Kleine Punkte zeigen, wo genau die einzelnen Denker in der Geschichte liegen —
+// macht sichtbar, wie ungleich Philosophen über die Jahrhunderte verteilt sind.
+function tlBuildMarks(){
+  const box=document.getElementById('tl-marks');
+  if(!box) return;
+  box.innerHTML = PH.map(p=>{
+    const yr=p.by||0;
+    const pct=((yr-TL_MIN)/(TL_MAX-TL_MIN))*100;
+    return `<div class="tl-mark" data-id="${p.id}" style="left:${pct}%;background:${p.c};box-shadow:0 0 5px ${p.c}"
+      title="${p.name} (${p.life})" onclick="event.stopPropagation();tlJumpToYear(${yr});flyToById('${p.id}')"></div>`;
+  }).join('');
+}
+tlBuildMarks();
+
+// ─── ABSPIELEN DURCH DIE ZEIT ────────────────────────────────────────────────
+let tlPlaying=false, tlPlayTimer=null;
+function tlTogglePlay(){
+  tlPlaying=!tlPlaying;
+  const btn=document.getElementById('tl-play');
+  btn.classList.toggle('playing',tlPlaying);
+  btn.textContent=tlPlaying?'⏸':'▶';
+  btn.title=tlPlaying?'Pausieren':'Durch die Zeit abspielen';
+  if(tlPlaying){
+    if(parseInt(tlSlider.value)>=TL_MAX) tlJumpToYear(TL_MIN);
+    tlPlayTimer=setInterval(()=>{
+      let next=parseInt(tlSlider.value)+7;
+      if(next>=TL_MAX){ next=TL_MAX; tlTogglePlay(); }
+      tlSlider.value=next;
+      tlSlider.dispatchEvent(new Event('input'));
+    },45);
+  } else {
+    clearInterval(tlPlayTimer);
+  }
+}
+function tlJumpToYear(yr){
+  tlSlider.value=Math.max(TL_MIN,Math.min(TL_MAX,yr));
+  tlSlider.dispatchEvent(new Event('input'));
+}
 function tlJumpToEra(idx){
   const e=TL_ERAS[idx];
   const mid=Math.round((e.start+e.end)/2);
@@ -1648,12 +2156,14 @@ function tlHighlightActiveEra(year){
 function toggleTimeline(){
   tlOpen=!tlOpen;
   document.getElementById('timeline-bar').classList.toggle('open',tlOpen);
+  if(!tlOpen && tlPlaying) tlTogglePlay();
   if(tlOpen){
     tlBuildEraBar();
     // Alle sichtbar machen bis aktuelles Jahr
     tlSlider.value='-600'; timelineYear=-600; tlYear.textContent='600 v.Chr.';
     tlName.textContent='';
     tlHighlightActiveEra(-600);
+    document.querySelectorAll('.tl-mark').forEach(el=>el.classList.add('tl-mark-future'));
     pMeshes.forEach(m=>{m.material.opacity=0.04;m.material.transparent=true;});
   } else {
     // Alle wieder voll sichtbar
@@ -1663,24 +2173,27 @@ function toggleTimeline(){
 }
 
 // ─── SUCHE ──────────────────────────────────────────────────────────────────
+let globalSearchIds=null; // null = keine aktive Suche, sonst Set von IDs
 const searchInput=document.getElementById('search-box');
 const searchResults=document.getElementById('search-results');
 searchInput.addEventListener('input',e=>{
   const q=e.target.value.trim().toLowerCase();
-  if(!q){searchResults.style.display='none';resetHighlight();return;}
+  if(!q){searchResults.style.display='none';resetHighlight();globalSearchIds=null;mmRefreshSearch();gxRefreshSearch();kgRefreshSearch();fcRefreshSearch();geoRefreshSearch();return;}
   const matches=PH.filter(p=>
     p.name.toLowerCase().includes(q)||
     p.era.toLowerCase().includes(q)||
     p.ideas.some(i=>i.toLowerCase().includes(q))||
     p.quote.toLowerCase().includes(q)
   );
+  globalSearchIds=new Set(matches.map(m=>m.id));
   highlightPhilosophers(matches.map(m=>m.id));
+  mmRefreshSearch(); gxRefreshSearch(); kgRefreshSearch(); fcRefreshSearch(); geoRefreshSearch();
   if(matches.length===0){searchResults.style.display='none';return;}
   searchResults.innerHTML=matches.slice(0,6).map(p=>
     `<div class="sr-item" onclick="flyToById('${p.id}')">
       <span class="sr-dot" style="background:${p.c};box-shadow:0 0 6px ${p.c}"></span>
       <span style="color:${p.c}">${p.name}</span>
-      <span style="color:#28203C;font-size:10px">${p.era}</span>
+      <span style="color:#6B7FA0;font-size:10px">${p.era}</span>
     </div>`
   ).join('');
   searchResults.style.display='block';
@@ -1705,8 +2218,62 @@ function highlightPhilosophers(ids){
     m.material.transparent=true;
   });
 }
+function mmRefreshSearch(){ if(typeof mmRunning!=='undefined' && mmRunning) mmRender(); }
+function gxRefreshSearch(){ if(typeof gxRunning!=='undefined' && gxRunning) gxRender(); }
+function kgRefreshSearch(){ if(typeof kgRunning!=='undefined' && kgRunning) kgRender(); }
+function fcRefreshSearch(){
+  const fcOpen=document.getElementById('fc-overlay') && document.getElementById('fc-overlay').classList.contains('show');
+  if(!fcOpen) return;
+  fcIdx=0;
+  fcBuildFilterBar();
+  fcRenderCard();
+}
+function geoRefreshSearch(){
+  if(!geoMarkers || !geoMarkers.length) return;
+  geoMarkers.forEach(m=>{
+    if(!globalSearchIds){ m.setStyle({fillOpacity:0.85, opacity:1}); return; }
+    const match = globalSearchIds.has(m.philId);
+    m.setStyle({fillOpacity: match?0.95:0.08, opacity: match?1:0.15});
+  });
+}
 function resetHighlight(){
   pMeshes.forEach(m=>{m.material.opacity=1;m.material.transparent=false;});
+}
+document.addEventListener('keydown', e=>{
+  if(document.activeElement && ['INPUT','TEXTAREA'].includes(document.activeElement.tagName)) return;
+  if((e.key==='r'||e.key==='R')) discoverRandom();
+});
+// Magnetischer Effekt für ausgewählte CTAs — folgt dem Cursor leicht, federt beim Verlassen zurück
+function applyMagnetic(el, strength, maxOffset){
+  strength = strength || 0.4; maxOffset = maxOffset || 8;
+  el.style.transition = 'transform .2s cubic-bezier(.34,1.56,.64,1)';
+  el.addEventListener('mousemove', e=>{
+    if(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    const rect = el.getBoundingClientRect();
+    const relX = e.clientX - (rect.left + rect.width/2);
+    const relY = e.clientY - (rect.top + rect.height/2);
+    const x = Math.max(-maxOffset, Math.min(maxOffset, relX*strength));
+    const y = Math.max(-maxOffset, Math.min(maxOffset, relY*strength));
+    el.style.transform = `translate(${x}px, ${y}px)`;
+  });
+  el.addEventListener('mouseleave', ()=>{ el.style.transform='translate(0,0)'; });
+}
+document.querySelectorAll('#cmp-toggle, #header-bar .hbtn[onclick^="discoverRandom"], .qz-next').forEach(el=>applyMagnetic(el, 0.4, 8));
+
+(function(){
+  const sb=document.getElementById('sidebar');
+  const spot=document.getElementById('sb-spotlight');
+  if(!sb||!spot) return;
+  sb.addEventListener('mousemove', e=>{
+    const rect=sb.getBoundingClientRect();
+    const x=e.clientX-rect.left, y=e.clientY-rect.top;
+    spot.style.background=`radial-gradient(320px circle at ${x}px ${y}px, rgba(150,205,255,0.08), transparent 70%)`;
+  });
+})();
+
+function discoverRandom(){
+  const pick = PH[Math.floor(Math.random()*PH.length)];
+  flyToById(pick.id);
 }
 function flyToById(id){
   const idx=PH.findIndex(p=>p.id===id);
@@ -1792,13 +2359,19 @@ setTimeout(()=>{
 // ─── SCHNELL-NAVIGATION (linke Seite) ────────────────────────────────────────
 (function buildQuickNav(){
   const nav=document.getElementById('quicknav');
+  nav.setAttribute('role','navigation');
+  nav.setAttribute('aria-label','Schnellzugriff auf alle Philosophen');
   PH.forEach((p,i)=>{
     const dot=document.createElement('div');
     dot.className='qn-dot';
     dot.style.cssText=`background:${p.c};box-shadow:0 0 5px ${p.c}77;color:${p.c}`;
     dot.title=p.name;
+    dot.setAttribute('role','button');
+    dot.setAttribute('tabindex','0');
+    dot.setAttribute('aria-label',p.name+', '+p.era);
     dot.innerHTML=`<span class="qn-tip" style="border-color:${p.c};color:${p.c}">${p.name} · ${p.era}</span>`;
     dot.addEventListener('click',()=>flyToById(p.id));
+    dot.addEventListener('keydown',e=>{ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); flyToById(p.id); } });
     nav.appendChild(dot);
   });
 })();
@@ -1975,6 +2548,12 @@ function qzUpdateScoreBar(){
   document.getElementById('qz-progress-fill').style.width = pct+'%';
 }
 
+function kineticHTML(text, wordDelay, baseDelay){
+  wordDelay = wordDelay || 0.03; baseDelay = baseDelay || 0;
+  return text.split(' ').map((w,i)=>
+    `<span class="kinetic-word" style="animation-delay:${(baseDelay+i*wordDelay).toFixed(3)}s">${w}</span>`
+  ).join(' ');
+}
 function qzNewQuestion(){
   const types=['quote','idea','era'];
   const type=types[Math.floor(Math.random()*types.length)];
@@ -1996,7 +2575,7 @@ function qzNewQuestion(){
 
   document.getElementById('qz-type').textContent=typeLabel;
   document.getElementById('qz-type').style.color=typeColor;
-  document.getElementById('qz-prompt').textContent=prompt;
+  document.getElementById('qz-prompt').innerHTML=kineticHTML(prompt, 0.028);
   document.getElementById('qz-result').style.display='none';
 
   const optsBox=document.getElementById('qz-opts');
@@ -2071,6 +2650,7 @@ document.addEventListener('keydown', e=>{
 let mmNodes=null, mmLinks=null, mmRunning=false, mmRaf=null;
 let mmTransform={x:0,y:0,k:1};
 let mmDragNode=null, mmPanStart=null, mmPanOrigin=null;
+let mmHoveredId=null;
 
 const ERA_COLORS_MM = {};
 PH.forEach(p=>{ if(!ERA_COLORS_MM[p.era]) ERA_COLORS_MM[p.era]=p.c; });
@@ -2136,21 +2716,42 @@ function mmRender(){
   const W=innerWidth, H=innerHeight;
   svg.setAttribute('viewBox','0 0 '+W+' '+H);
   const t=mmTransform;
+
+  // Verbundene Knoten des gehoverten Knotens ermitteln (für Hervorhebung)
+  let related=null;
+  if(mmHoveredId==='__era__' && mmHoveredEra){
+    related=new Set(mmNodes.filter(n=>n.era===mmHoveredEra).map(n=>n.id));
+  } else if(mmHoveredId){
+    related=new Set([mmHoveredId]);
+    mmLinks.forEach(l=>{
+      if(l.source.id===mmHoveredId) related.add(l.target.id);
+      if(l.target.id===mmHoveredId) related.add(l.source.id);
+    });
+  } else if(globalSearchIds){
+    related=globalSearchIds;
+  }
+
   let html = '<defs><marker id="mmArrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">'+
     '<path d="M1,1 L9,5 L1,9" fill="none" stroke="context-stroke" stroke-width="1.5"/></marker></defs>';
   html += '<g transform="translate('+t.x+','+t.y+') scale('+t.k+')">';
   // Links
   mmLinks.forEach(l=>{
+    const isRelated = !related || (related.has(l.source.id) && related.has(l.target.id));
+    const op = related ? (isRelated ? 0.85 : 0.05) : 0.32;
     html += '<line x1="'+l.source.x+'" y1="'+l.source.y+'" x2="'+l.target.x+'" y2="'+l.target.y+
-      '" stroke="'+l.color+'" stroke-width="1.3" opacity="0.32" marker-end="url(#mmArrow)"/>';
+      '" stroke="'+l.color+'" stroke-width="'+(isRelated&&related?2:1.3)+'" opacity="'+op+'" marker-end="url(#mmArrow)"/>';
   });
   // Nodes
   mmNodes.forEach(n=>{
-    html += '<g class="mm-node" data-id="'+n.id+'" style="cursor:pointer">'+
+    const isRelated = !related || related.has(n.id);
+    const nodeOp = related ? (isRelated?1:0.12) : 1;
+    const labelOp = related ? (isRelated?1:0.15) : 0.9;
+    html += '<g class="mm-node" data-id="'+n.id+'" style="cursor:pointer" opacity="'+nodeOp+'">'+
       '<circle cx="'+n.x+'" cy="'+n.y+'" r="'+(n.r+7)+'" fill="'+n.c+'" opacity="0.15"/>'+
       '<circle cx="'+n.x+'" cy="'+n.y+'" r="'+n.r+'" fill="'+n.c+'" opacity="0.85" stroke="'+n.c+'" stroke-width="1.5"/>'+
       '<circle cx="'+(n.x-n.r*0.3)+'" cy="'+(n.y-n.r*0.3)+'" r="'+(n.r*0.28)+'" fill="white" opacity="0.7"/>'+
-      '<text x="'+n.x+'" y="'+(n.y+n.r+13)+'" text-anchor="middle" fill="'+n.c+'" font-size="10" font-family="monospace" opacity="0.9">'+n.s+'</text>'+
+      '<text x="'+n.x+'" y="'+(n.y+n.r+13)+'" text-anchor="middle" fill="'+n.c+'" font-size="10" font-family="monospace" '+
+      'opacity="'+labelOp+'" stroke="#03050A" stroke-width="3" paint-order="stroke" style="pointer-events:none">'+n.s+'</text>'+
       '</g>';
   });
   html += '</g>';
@@ -2158,9 +2759,9 @@ function mmRender(){
 
   // Event-Listener neu binden (innerHTML löscht alte)
   svg.querySelectorAll('.mm-node').forEach(el=>{
-    el.addEventListener('mouseenter', e=>mmShowTooltip(el.dataset.id, e));
+    el.addEventListener('mouseenter', e=>{ mmHoveredId=el.dataset.id; mmShowTooltip(el.dataset.id, e); });
     el.addEventListener('mousemove', e=>mmMoveTooltip(e));
-    el.addEventListener('mouseleave', mmHideTooltip);
+    el.addEventListener('mouseleave', ()=>{ mmHoveredId=null; mmHideTooltip(); });
     el.addEventListener('mousedown', e=>{ e.stopPropagation(); mmStartDrag(el.dataset.id); });
     el.addEventListener('click', e=>{ e.stopPropagation(); if(!mmWasDragged) mmOpenDetail(el.dataset.id); });
   });
@@ -2208,11 +2809,17 @@ function mmOpenDetail(id){
 function mmBuildLegend(){
   const legend=document.getElementById('mm-legend');
   const eras=[...new Set(PH.map(p=>p.era))];
-  legend.innerHTML = '<div style="color:#4A7BA8;letter-spacing:2px;margin-bottom:8px">EPOCHEN</div>' +
+  legend.innerHTML = '<div style="color:#4A7BA8;letter-spacing:2px;margin-bottom:8px">EPOCHEN · KLICKBAR</div>' +
     eras.map(era=>{
       const c=ERA_COLORS_MM[era];
-      return '<div class="ml-item"><span class="ml-dot" style="background:'+c+';box-shadow:0 0 5px '+c+'"></span><span style="color:'+c+'">'+era+'</span></div>';
+      return '<div class="ml-item" data-era="'+era+'" onmouseenter="mmHighlightEra(\''+era+'\')" onmouseleave="mmHighlightEra(null)">'+
+        '<span class="ml-dot" style="background:'+c+';box-shadow:0 0 5px '+c+'"></span><span style="color:'+c+'">'+era+'</span></div>';
     }).join('');
+}
+let mmHoveredEra=null;
+function mmHighlightEra(era){
+  mmHoveredEra=era;
+  mmHoveredId = era ? '__era__' : null; // aktiviert den Dimm-Modus im Render, ohne echten Knoten
 }
 
 // Pan & Zoom auf dem SVG-Hintergrund
@@ -2275,6 +2882,7 @@ document.addEventListener('keydown', e=>{
 // Philosophen als Sterne, gruppiert nach Epoche (Sternhaufen). Eigenständiges
 // Overlay, beeinflusst die 3D-Baum-Szene nicht.
 let gxNodes=null, gxLinks=null, gxBgStars=null, gxRunning=false, gxRaf=null;
+let gxHoveredId=null, gxHoveredEra=null;
 let gxTransform={x:0,y:0,k:1};
 let gxDragNode=null, gxPanStart=null, gxPanOrigin=null, gxWasDragged=false;
 
@@ -2323,7 +2931,7 @@ function gxInit(){
         const key=[a.id,b.id].sort().join('-');
         if(!seen.has(key)){
           seen.add(key);
-          gxLinks.push({source:nodeById[a.id], target:nodeById[b.id], color:'#28203C', strong:false});
+          gxLinks.push({source:nodeById[a.id], target:nodeById[b.id], color:'#96CDFF', strong:false});
         }
       }
     }
@@ -2389,29 +2997,49 @@ function gxRender(t){
 
   html += '<g transform="translate('+tr.x+','+tr.y+') scale('+tr.k+')">';
 
+  // Verbundene Knoten des gehoverten Sterns ermitteln
+  let related=null;
+  if(gxHoveredId==='__era__' && gxHoveredEra){
+    related=new Set(gxNodes.filter(n=>n.era===gxHoveredEra).map(n=>n.id));
+  } else if(gxHoveredId){
+    related=new Set([gxHoveredId]);
+    gxLinks.forEach(l=>{
+      if(l.source.id===gxHoveredId) related.add(l.target.id);
+      if(l.target.id===gxHoveredId) related.add(l.source.id);
+    });
+  } else if(globalSearchIds){
+    related=globalSearchIds;
+  }
+
   // Cluster-Beschriftung (Epochen-Namen an ihrem Zentrum)
   const centersSeen={};
   gxNodes.forEach(n=>{ centersSeen[n.era] = {x:n.cx, y:n.cy, c:n.c}; });
   Object.entries(centersSeen).forEach(([era,c])=>{
     html += '<text x="'+c.x+'" y="'+(c.y-72)+'" text-anchor="middle" fill="'+c.c+'" font-size="10" '+
-      'font-family="monospace" opacity="0.4" letter-spacing="2">'+era.toUpperCase()+'</text>';
+      'font-family="monospace" opacity="0.55" letter-spacing="2" stroke="#03050A" stroke-width="3" paint-order="stroke">'+era.toUpperCase()+'</text>';
   });
 
   // Konstellationslinien (schwach = gemeinsame Ideen)
   gxLinks.filter(l=>!l.strong).forEach(l=>{
+    const isRelated = !related || (related.has(l.source.id) && related.has(l.target.id));
+    const op = related ? (isRelated?0.4:0.03) : 0.15;
     html += '<line x1="'+l.source.x+'" y1="'+l.source.y+'" x2="'+l.target.x+'" y2="'+l.target.y+
-      '" stroke="'+l.color+'" stroke-width="0.6" opacity="0.15"/>';
+      '" stroke="'+l.color+'" stroke-width="0.6" opacity="'+op+'"/>';
   });
   // Starke Linien (Einfluss)
   gxLinks.filter(l=>l.strong).forEach(l=>{
+    const isRelated = !related || (related.has(l.source.id) && related.has(l.target.id));
+    const op = related ? (isRelated?0.9:0.03) : 0.35;
     html += '<line x1="'+l.source.x+'" y1="'+l.source.y+'" x2="'+l.target.x+'" y2="'+l.target.y+
-      '" stroke="'+l.color+'" stroke-width="1" opacity="0.35"/>';
+      '" stroke="'+l.color+'" stroke-width="'+(isRelated&&related?1.8:1)+'" opacity="'+op+'"/>';
   });
 
   // Sterne (Philosophen)
   gxNodes.forEach(n=>{
+    const isRelated = !related || related.has(n.id);
+    const dim = related ? (isRelated?1:0.1) : 1;
     const pulse = 0.75+Math.sin(t*0.002+n.x*0.01)*0.25;
-    html += '<g class="gx-node" data-id="'+n.id+'" style="cursor:pointer">'+
+    html += '<g class="gx-node" data-id="'+n.id+'" style="cursor:pointer" opacity="'+dim+'">'+
       '<circle cx="'+n.x+'" cy="'+n.y+'" r="'+(n.r*4)+'" fill="url(#gxStarGlow)" opacity="'+(0.35*pulse)+'" style="mix-blend-mode:screen"/>'+
       '<circle cx="'+n.x+'" cy="'+n.y+'" r="'+n.r+'" fill="'+n.c+'" opacity="'+(0.9*pulse)+'"/>'+
       '<circle cx="'+n.x+'" cy="'+n.y+'" r="'+(n.r*0.4)+'" fill="#fff" opacity="0.85"/>'+
@@ -2422,9 +3050,9 @@ function gxRender(t){
   svg.innerHTML = html;
 
   svg.querySelectorAll('.gx-node').forEach(el=>{
-    el.addEventListener('mouseenter', e=>gxShowTooltip(el.dataset.id, e));
+    el.addEventListener('mouseenter', e=>{ gxHoveredId=el.dataset.id; gxShowTooltip(el.dataset.id, e); });
     el.addEventListener('mousemove', e=>gxMoveTooltip(e));
-    el.addEventListener('mouseleave', gxHideTooltip);
+    el.addEventListener('mouseleave', ()=>{ gxHoveredId=null; gxHideTooltip(); });
     el.addEventListener('mousedown', e=>{ e.stopPropagation(); gxDragNode=gxNodes.find(n=>n.id===el.dataset.id); gxWasDragged=false; });
     el.addEventListener('click', e=>{ e.stopPropagation(); if(!gxWasDragged) gxOpenDetail(el.dataset.id); });
   });
@@ -2469,10 +3097,14 @@ function gxBuildClusterList(){
     GX_ERAS.map(era=>{
       const c = PH.find(p=>p.era===era).c;
       const count = PH.filter(p=>p.era===era).length;
-      return '<div class="gc-item" onclick="gxFocusEra(\''+era+'\')">'+
+      return '<div class="gc-item" onclick="gxFocusEra(\''+era+'\')" onmouseenter="gxHighlightEra(\''+era+'\')" onmouseleave="gxHighlightEra(null)">'+
         '<span class="gc-dot" style="background:'+c+';box-shadow:0 0 5px '+c+'"></span>'+
         '<span style="color:'+c+'">'+era+' ('+count+')</span></div>';
     }).join('');
+}
+function gxHighlightEra(era){
+  gxHoveredId = era ? '__era__' : null;
+  gxHoveredEra = era;
 }
 function gxFocusEra(era){
   const node = gxNodes.find(n=>n.era===era);
@@ -2598,7 +3230,8 @@ function fcBuildDeck(){
 }
 
 function fcApplyFilter(){
-  const all = fcDeck;
+  let all = fcDeck;
+  if(globalSearchIds) all = all.filter(c=>globalSearchIds.has(c.philId));
   return fcFilter==='all' ? all : all.filter(c=>c.type===fcFilter);
 }
 
@@ -2686,6 +3319,8 @@ document.addEventListener('keydown', e=>{
   if(e.key==='ArrowRight'){ fcNext(); }
   if(e.key==='ArrowLeft'){ fcPrev(); }
   if(e.key===' '){ e.preventDefault(); fcFlip(); }
+  if(e.key==='j'||e.key==='J'){ fcMark(true); }
+  if(e.key==='n'||e.key==='N'){ fcMark(false); }
 });
 
 
@@ -2764,6 +3399,7 @@ function geoInit(){
       radius:7, fillColor:p.c, color:'#fff', weight:2, fillOpacity:0.85,
       className:'geo-marker'
     }).addTo(geoMap);
+    marker.philId = p.id;
 
     const popupHtml = '<div class="gp-era" style="color:'+p.c+'">'+p.era+'</div>'+
       '<div class="gp-name" style="color:'+p.c+'">'+p.name+'</div>'+
@@ -2772,7 +3408,18 @@ function geoInit(){
       '<a class="gp-btn" href="javascript:void(0)" onclick="geoOpenDetail(\''+p.id+'\')">Im Baum ansehen →</a>';
 
     marker.bindPopup(popupHtml, {className:'geo-popup', maxWidth:280});
-    marker.on('mouseover', function(){ this.openPopup(); });
+    let geoCloseTimer=null;
+    const geoCancelClose=()=>{ if(geoCloseTimer){ clearTimeout(geoCloseTimer); geoCloseTimer=null; } };
+    const geoScheduleClose=()=>{
+      geoCancelClose();
+      geoCloseTimer=setTimeout(()=>{ marker.setStyle({radius:7,weight:2}); marker.closePopup(); }, 250);
+    };
+    marker.on('mouseover', function(){ geoCancelClose(); this.setStyle({radius:10, weight:3}); this.openPopup(); });
+    marker.on('mouseout', geoScheduleClose);
+    marker.on('popupopen', function(e){
+      const el=e.popup.getElement();
+      if(el){ el.addEventListener('mouseenter', geoCancelClose); el.addEventListener('mouseleave', geoScheduleClose); }
+    });
     geoMarkers.push(marker);
   });
 }
@@ -2806,6 +3453,7 @@ document.addEventListener('keydown', e=>{
 // beeinflusst die 3D-Baum-Szene nicht.
 
 let kgNodes=null, kgEdges=null, kgRunning=false, kgRaf=null;
+let kgHoveredId=null;
 let kgTransform={x:0,y:0,k:1};
 let kgDragNode=null, kgPanStart=null, kgPanOrigin=null, kgWasDragged=false;
 const KG_CACHE_KEY = 'tok3d-knowledge-graph-v1';
@@ -2937,28 +3585,44 @@ function kgRender(){
   const W=innerWidth, H=innerHeight;
   svg.setAttribute('viewBox','0 0 '+W+' '+H);
   const t=kgTransform;
+
+  let related=null;
+  if(kgHoveredId){
+    related=new Set([kgHoveredId]);
+    kgEdges.forEach(e=>{
+      if(e.source.id===kgHoveredId) related.add(e.target.id);
+      if(e.target.id===kgHoveredId) related.add(e.source.id);
+    });
+  } else if(globalSearchIds){
+    related=globalSearchIds;
+  }
+
   let html = '<g transform="translate('+t.x+','+t.y+') scale('+t.k+')">';
   kgEdges.forEach(e=>{
-    const op = 0.12 + e.sim*0.55;
-    const w = 0.6 + e.sim*2.2;
+    const isRelated = !related || (related.has(e.source.id) && related.has(e.target.id));
+    const op = related ? (isRelated ? Math.min(0.9,0.3+e.sim*0.6) : 0.03) : (0.12 + e.sim*0.55);
+    const w = (isRelated&&related?1.4:0) + 0.6 + e.sim*2.2;
     html += '<line x1="'+e.source.x+'" y1="'+e.source.y+'" x2="'+e.target.x+'" y2="'+e.target.y+
       '" stroke="#96CDFF" stroke-width="'+w+'" opacity="'+op+'"/>';
   });
   kgNodes.forEach(n=>{
-    html += '<g class="kg-node" data-id="'+n.id+'" style="cursor:pointer">'+
+    const isRelated = !related || related.has(n.id);
+    const dim = related ? (isRelated?1:0.12) : 1;
+    html += '<g class="kg-node" data-id="'+n.id+'" style="cursor:pointer" opacity="'+dim+'">'+
       '<circle cx="'+n.x+'" cy="'+n.y+'" r="'+(n.r+6)+'" fill="'+n.c+'" opacity="0.15"/>'+
       '<circle cx="'+n.x+'" cy="'+n.y+'" r="'+n.r+'" fill="'+n.c+'" opacity="0.85" stroke="'+n.c+'" stroke-width="1.5"/>'+
       '<circle cx="'+(n.x-n.r*0.3)+'" cy="'+(n.y-n.r*0.3)+'" r="'+(n.r*0.28)+'" fill="white" opacity="0.7"/>'+
-      '<text x="'+n.x+'" y="'+(n.y+n.r+13)+'" text-anchor="middle" fill="'+n.c+'" font-size="10" font-family="monospace" opacity="0.9">'+n.s+'</text>'+
+      '<text x="'+n.x+'" y="'+(n.y+n.r+13)+'" text-anchor="middle" fill="'+n.c+'" font-size="10" font-family="monospace" '+
+      'opacity="0.9" stroke="#03050A" stroke-width="3" paint-order="stroke" style="pointer-events:none">'+n.s+'</text>'+
       '</g>';
   });
   html += '</g>';
   svg.innerHTML = html;
 
   svg.querySelectorAll('.kg-node').forEach(el=>{
-    el.addEventListener('mouseenter', e=>kgShowTooltip(el.dataset.id, e));
+    el.addEventListener('mouseenter', e=>{ kgHoveredId=el.dataset.id; kgShowTooltip(el.dataset.id, e); });
     el.addEventListener('mousemove', e=>kgMoveTooltip(e));
-    el.addEventListener('mouseleave', kgHideTooltip);
+    el.addEventListener('mouseleave', ()=>{ kgHoveredId=null; kgHideTooltip(); });
     el.addEventListener('mousedown', e=>{ e.stopPropagation(); kgDragNode=kgNodes.find(n=>n.id===el.dataset.id); kgWasDragged=false; });
     el.addEventListener('click', e=>{ e.stopPropagation(); if(!kgWasDragged){ closeKnowledgeGraph(); flyToById(el.dataset.id); } });
   });
@@ -3068,6 +3732,25 @@ document.addEventListener('keydown', e=>{
   if(kgOpen && e.key==='Escape'){ closeKnowledgeGraph(); }
 });
 
+// ─── PHILOSOPHIE-INTRO ────────────────────────────────────────────────────────
+// Zeigt die Vision des Projekts einmal pro Sitzung, bevor der Baum erscheint.
+(function(){
+  const el=document.getElementById('philosophy-intro');
+  if(!el) return;
+  let shown=false;
+  try{ shown = sessionStorage.getItem('tok-philosophy-intro-shown'); }catch(e){}
+  if(shown){ el.style.display='none'; return; }
+
+  function dismiss(){
+    if(el.classList.contains('leaving')) return;
+    el.classList.add('leaving');
+    try{ sessionStorage.setItem('tok-philosophy-intro-shown','1'); }catch(e){}
+    setTimeout(()=>{ el.style.display='none'; }, 750);
+  }
+  window.dismissPhilosophyIntro = dismiss;
+  document.addEventListener('keydown', dismiss, { once:true });
+  setTimeout(dismiss, 5200);
+})();
 </script>
 </body>
 </html>

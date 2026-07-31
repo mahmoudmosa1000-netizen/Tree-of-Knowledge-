@@ -25,13 +25,7 @@ const config: Config = {
           dim: "#FF8C3C",
         },
         sage: "#FFBE78",
-        ember: "#B5573F",
-        // Beibehalten für Rückwärtskompatibilität bestehender Komponenten
-        accent: {
-          DEFAULT: "#96CDFF",
-          bright: "#C8E1FF",
-          green: "#FFBE78",
-        },
+        ember: "#C36348",
       },
       fontFamily: {
         display: ["var(--font-display)", "Georgia", "serif"],
@@ -96,6 +90,10 @@ const config: Config = {
           "0%": { opacity: "0", transform: "scale(0.85)" },
           "100%": { opacity: "1", transform: "scale(1)" },
         },
+        kineticWord: {
+          "0%": { opacity: "0", transform: "translateY(6px)" },
+          "100%": { opacity: "1", transform: "translateY(0)" },
+        },
       },
       animation: {
         "fade-in-up": "fadeInUp 0.5s cubic-bezier(0.16,1,0.3,1) both",
@@ -104,6 +102,7 @@ const config: Config = {
         "pulse-correct": "pulseCorrect 0.4s ease-out",
         shake: "shake 0.4s ease-in-out",
         "pop-in": "popIn 0.35s cubic-bezier(0.34,1.56,0.64,1) both",
+        "kinetic-word": "kineticWord 0.45s ease-out both",
       },
       transitionTimingFunction: {
         spring: "cubic-bezier(0.34, 1.56, 0.64, 1)",

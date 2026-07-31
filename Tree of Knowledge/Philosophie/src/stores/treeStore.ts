@@ -23,6 +23,13 @@ interface TreeState {
 
   sidebarOpen: boolean;
   setSidebarOpen: (open: boolean) => void;
+
+  compareIds: string[];
+  toggleCompare: (id: string) => void;
+  setCompareSlot: (slot: 0 | 1, id: string) => void;
+  clearCompare: () => void;
+  compareOpen: boolean;
+  setCompareOpen: (open: boolean) => void;
 }
 
 export const useTreeStore = create<TreeState>()(
@@ -49,6 +56,28 @@ export const useTreeStore = create<TreeState>()(
 
       sidebarOpen: false,
       setSidebarOpen: (sidebarOpen) => set({ sidebarOpen }),
+
+      compareIds: [],
+      toggleCompare: (id) =>
+        set((s) => {
+          if (s.compareIds.includes(id)) {
+            return { compareIds: s.compareIds.filter((x) => x !== id) };
+          }
+          const next = [...s.compareIds, id];
+          // Bei drittem Klick den ältesten Eintrag verwerfen (FIFO)
+          if (next.length > 2) next.shift();
+          return { compareIds: next };
+        }),
+      setCompareSlot: (slot, id) =>
+        set((s) => {
+          const next = [...s.compareIds];
+          if (slot < next.length) next[slot] = id;
+          else next.push(id);
+          return { compareIds: next.slice(0, 2) };
+        }),
+      clearCompare: () => set({ compareIds: [], compareOpen: false }),
+      compareOpen: false,
+      setCompareOpen: (compareOpen) => set({ compareOpen }),
     }),
     { name: "tree-of-knowledge-store" }
   )

@@ -36,7 +36,10 @@ export default function RootLayout({
 }) {
   return (
     <html lang="de" className={`${display.variable} ${body.variable} ${mono.variable}`}>
-      <body>{children}</body>
+      <body>
+        <div className="noise-layer" aria-hidden="true" />
+        {children}
+      </body>
     </html>
   );
 }
