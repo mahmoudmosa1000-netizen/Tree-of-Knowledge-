@@ -145,6 +145,54 @@ canvas{display:block;position:fixed;inset:0}
 /* ── Zeitleiste ────────────────────────────────── */
 
 
+
+
+
+
+
+/* ── Suche ─────────────────────────────────────── */
+
+
+
+
+
+
+
+
+/* ── Audio-Button ──────────────────────────────── */
+
+
+/* ── Timeline-Toggle ───────────────────────────── */
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  
+  
+  
+
+
+
+
+
+
+
+
+
+
+
 #webgl-error{position:fixed;inset:0;background:#03050A;z-index:300;display:none;align-items:center;justify-content:center;flex-direction:column;gap:16px;text-align:center;padding:20px}
 #webgl-error h2{color:#FF6688;font-size:18px}
 #webgl-error p{color:#5C4F70;font-size:11px;max-width:340px;line-height:1.6}
@@ -755,13 +803,13 @@ html[dir="rtl"] #lang-switch{direction:ltr}
   <svg id="load-skeleton" viewBox="0 0 1000 460" aria-hidden="true">
     <rect x="470" y="380" width="60" height="80" fill="#0c0c10" rx="8" opacity="0.6"/>
   </svg>
-  <div class="sp"></div><p>TREE OF KNOWLEDGE</p><div class="progress"><div class="progress-bar" id="load-bar"></div></div>
+  <div class="sp"></div><p data-i18n="brand_title">TREE OF KNOWLEDGE</p><div class="progress"><div class="progress-bar" id="load-bar"></div></div>
 </div>
 <div id="crosshair"></div>
 
 <!-- ══════════════ HEADER: Marke, Suche, Werkzeuge — alles in einer Reihe ══════════════ -->
 <header id="header-bar">
-  <h1 id="header-brand" style="margin:0"><span class="dot"></span><span class="full">TREE OF KNOWLEDGE</span></h1>
+  <h1 id="header-brand" style="margin:0"><span class="dot"></span><span class="full" data-i18n="brand_title">TREE OF KNOWLEDGE</span></h1>
   <div id="header-search-wrap">
     <span class="icon">⌕</span>
     <input id="search-box" type="text" data-i18n-placeholder="search_placeholder" placeholder="Philosoph, Epoche oder Idee suchen…" aria-label="Philosoph, Epoche oder Idee suchen" autocomplete="off"/>
@@ -773,6 +821,7 @@ html[dir="rtl"] #lang-switch{direction:ltr}
     <button class="lang-btn" data-lang="ar" onclick="setLanguage('ar')">AR</button>
   </div>
   <div id="header-tools">
+    <button class="hbtn" id="kg-btn" onclick="openKnowledgeGraph()">🧠 <span class="lbl" data-i18n="nav_wissensgraph">Wissensgraph</span></button>
     <button class="hbtn" id="geo-btn" onclick="openGeoMap()">🗺 <span class="lbl" data-i18n="nav_karte">Karte</span></button>
     <button class="hbtn" id="fc-btn" onclick="openFlashcards()">🎓 <span class="lbl" data-i18n="nav_lernkarten">Lernkarten</span></button>
     <button class="hbtn" id="gx-btn" onclick="openGalaxy()">🌌 <span class="lbl" data-i18n="nav_galaxy">Galaxy</span></button>
@@ -786,6 +835,7 @@ html[dir="rtl"] #lang-switch{direction:ltr}
   <div id="footer-left">
     <button class="hbtn" id="tl-toggle" onclick="toggleTimeline()">⏱ <span class="lbl" data-i18n="footer_zeitleiste">Zeitleiste</span></button>
     <button class="hbtn" id="cmp-toggle" onclick="openCompare()">⚖ <span class="lbl" data-i18n="footer_vergleich">Vergleich</span></button>
+    <button class="hbtn" onclick="discoverRandom()" data-i18n-title="footer_zufall_title" title="Zufälligen Philosophen entdecken (R)">🎲 <span class="lbl" data-i18n="footer_zufall">Zufall</span></button>
     <button class="hbtn" onclick="openSchools()" data-i18n-title="footer_schulen_title" title="Stammbaum der Denkrichtungen">🌿 <span class="lbl" data-i18n="footer_schulen">Schulen</span></button>
   </div>
 
@@ -795,12 +845,12 @@ html[dir="rtl"] #lang-switch{direction:ltr}
   <label data-i18n="timeline_label">ZEITLEISTE DER PHILOSOPHIE</label>
   <div class="row">
     <button id="tl-play" onclick="tlTogglePlay()" data-i18n-title="timeline_play_title" title="Durch die Zeit abspielen">▶</button>
-    <span style="font-size:10px;color:#6B7FA0;font-family:monospace">600 v.Chr.</span>
+    <span id="tl-min-label" style="font-size:10px;color:#6B7FA0;font-family:monospace">600 v.Chr.</span>
     <div id="tl-track-wrap">
       <input id="tl-slider" type="range" min="-600" max="2002" value="-600"/>
       <div id="tl-marks"></div>
     </div>
-    <span style="font-size:10px;color:#6B7FA0;font-family:monospace">2000</span>
+    <span id="tl-max-label" style="font-size:10px;color:#6B7FA0;font-family:monospace">2000</span>
     <span id="tl-year">— v.Chr.</span>
   </div>
   <div class="row" style="margin-top:6px"><span id="tl-name"></span></div>
@@ -823,24 +873,16 @@ html[dir="rtl"] #lang-switch{direction:ltr}
 </div>
 
 <div id="intro-title">
-  <h1>TREE OF KNOWLEDGE</h1>
-  <p>PHILOSOPHIE ALS LEBENDIGES UNIVERSUM</p>
+  <h1 data-i18n="brand_title">TREE OF KNOWLEDGE</h1>
+  <p data-i18n="intro_subtitle">PHILOSOPHIE ALS LEBENDIGES UNIVERSUM</p>
 </div>
 
 <div id="philosophy-intro" onclick="dismissPhilosophyIntro()">
   <div class="pi-tree">🌳</div>
-  <p class="pi-main">
-    <span class="kinetic-word" style="animation-delay:0s">Wissen</span>
-    <span class="kinetic-word" style="animation-delay:.09s">ist</span>
-    <span class="kinetic-word" style="animation-delay:.18s">kein</span>
-    <span class="kinetic-word" style="animation-delay:.27s">Ziel,</span><br/>
-    <span class="kinetic-word" style="animation-delay:.55s">sondern</span>
-    <span class="kinetic-word" style="animation-delay:.64s">eine</span>
-    <span class="kinetic-word" style="animation-delay:.73s">Reise.</span>
-  </p>
-  <p class="pi-sub">Jede Frage eröffnet neue Perspektiven.</p>
-  <p class="pi-tag">Tree of Knowledge lädt dich ein, Philosophie interaktiv zu erleben.</p>
-  <p class="pi-hint">zum Beginnen tippen oder warten</p>
+  <p class="pi-main" id="pi-main-text"></p>
+  <p class="pi-sub" data-i18n="pi_sub">Jede Frage eröffnet neue Perspektiven.</p>
+  <p class="pi-tag" data-i18n="pi_tag">Tree of Knowledge lädt dich ein, Philosophie interaktiv zu erleben.</p>
+  <p class="pi-hint" data-i18n="pi_hint">zum Beginnen tippen oder warten</p>
 </div>
 
 <button id="cmp-pill" onclick="openCompare()">⚖ Vergleich anzeigen</button>
@@ -848,10 +890,10 @@ html[dir="rtl"] #lang-switch{direction:ltr}
 <div id="cmp-overlay" onclick="if(event.target===this)closeCompare()">
   <div id="cmp-box">
     <div class="cmp-head">
-      <span class="cmp-head-title">⚖ Vergleich</span>
+      <span class="cmp-head-title">⚖ <span data-i18n="cmp_title">Vergleich</span></span>
       <div style="margin-left:auto;display:flex;gap:8px">
-        <button class="gp-btn" onclick="resetCompare()" style="text-decoration:none">Zurücksetzen</button>
-        <button class="gp-btn" onclick="closeCompare()" style="text-decoration:none">✕</button>
+        <button class="gp-btn" onclick="resetCompare()" style="text-decoration:none" data-i18n="cmp_reset">Zurücksetzen</button>
+        <button class="gp-btn" onclick="closeCompare()" style="text-decoration:none" data-i18n-title="cmp_close_title" title="Schließen">✕</button>
       </div>
     </div>
     <div class="cmp-pickers">
@@ -859,7 +901,7 @@ html[dir="rtl"] #lang-switch{direction:ltr}
       <div class="cmp-picker" id="cmp-picker-1"></div>
     </div>
     <div class="cmp-relation" id="cmp-relation"></div>
-    <div id="cmp-empty-hint" class="cmp-empty-hint">Wähle zwei Philosophen aus, um sie Ebene für Ebene zu vergleichen.</div>
+    <div id="cmp-empty-hint" class="cmp-empty-hint" data-i18n="cmp_empty_hint">Wähle zwei Philosophen aus, um sie Ebene für Ebene zu vergleichen.</div>
     <div class="cmp-table" id="cmp-table"></div>
   </div>
 </div>
@@ -1045,11 +1087,25 @@ const I18N = {
     mm_hint_1: "Klick auf Knoten", mm_hint_2: "→ Details anzeigen",
     mm_legend_header: "EPOCHEN · KLICKBAR",
     view_in_tree: "Im Baum ansehen →",
+    brand_title: "TREE OF KNOWLEDGE",
+    intro_subtitle: "PHILOSOPHIE ALS LEBENDIGES UNIVERSUM",
+    pi_sub: "Jede Frage eröffnet neue Perspektiven.",
+    pi_tag: "Tree of Knowledge lädt dich ein, Philosophie interaktiv zu erleben.",
+    pi_hint: "zum Beginnen tippen oder warten",
     gx_close_title: "Galaxy schließen (ESC)",
     gx_title: "WISSENS-GALAXIE · 51 PHILOSOPHEN NACH EPOCHE GECLUSTERT",
     gx_search_placeholder: "⌕ Philosoph suchen…",
     gx_hint_1: "Ziehen zum Verschieben", gx_hint_2: "Scrollen zum Zoomen",
-    gx_cluster_header: "STERNHAUFEN"
+    gx_cluster_header: "STERNHAUFEN",
+    cmp_title: "Vergleich", cmp_reset: "Zurücksetzen", cmp_close_title: "Schließen",
+    cmp_empty_hint: "Wähle zwei Philosophen aus, um sie Ebene für Ebene zu vergleichen.",
+    cmp_change: "ändern", cmp_choose_a: "Philosoph A wählen…", cmp_choose_b: "Philosoph B wählen…",
+    cmp_no_matches: "Keine Treffer",
+    cmp_influenced: "{a} beeinflusste {b}",
+    cmp_same_era: "Beide gehören zur Epoche „{era}\u201c",
+    cmp_years_apart: "{n} Jahre trennen ihre Geburt",
+    cmp_row_name: "Name", cmp_row_era: "Epoche", cmp_row_life: "Lebensdaten",
+    cmp_row_quote: "Zitat", cmp_row_ideas: "Ideen", cmp_row_works: "Werke"
   },
   en: {
     search_placeholder: "Search philosopher, era or idea…",
@@ -1088,11 +1144,25 @@ const I18N = {
     mm_hint_1: "Click a node", mm_hint_2: "→ show details",
     mm_legend_header: "ERAS · CLICKABLE",
     view_in_tree: "View in tree →",
+    brand_title: "TREE OF KNOWLEDGE",
+    intro_subtitle: "PHILOSOPHY AS A LIVING UNIVERSE",
+    pi_sub: "Every question opens new perspectives.",
+    pi_tag: "Tree of Knowledge invites you to experience philosophy interactively.",
+    pi_hint: "tap or wait to begin",
     gx_close_title: "Close galaxy (ESC)",
     gx_title: "KNOWLEDGE GALAXY · 51 PHILOSOPHERS CLUSTERED BY ERA",
     gx_search_placeholder: "⌕ Search philosopher…",
     gx_hint_1: "Drag to move", gx_hint_2: "Scroll to zoom",
-    gx_cluster_header: "STAR CLUSTERS"
+    gx_cluster_header: "STAR CLUSTERS",
+    cmp_title: "Compare", cmp_reset: "Reset", cmp_close_title: "Close",
+    cmp_empty_hint: "Choose two philosophers to compare them level by level.",
+    cmp_change: "change", cmp_choose_a: "Choose philosopher A…", cmp_choose_b: "Choose philosopher B…",
+    cmp_no_matches: "No matches",
+    cmp_influenced: "{a} influenced {b}",
+    cmp_same_era: "Both belong to the era \u201c{era}\u201d",
+    cmp_years_apart: "{n} years separate their birth",
+    cmp_row_name: "Name", cmp_row_era: "Era", cmp_row_life: "Dates",
+    cmp_row_quote: "Quote", cmp_row_ideas: "Ideas", cmp_row_works: "Works"
   },
   ar: {
     search_placeholder: "ابحث عن فيلسوف أو حقبة أو فكرة…",
@@ -1131,11 +1201,25 @@ const I18N = {
     mm_hint_1: "انقر على عقدة", mm_hint_2: "← لعرض التفاصيل",
     mm_legend_header: "الحقب · قابلة للنقر",
     view_in_tree: "عرض في الشجرة ←",
+    brand_title: "شجرة المعرفة",
+    intro_subtitle: "الفلسفة كعالم حي",
+    pi_sub: "كل سؤال يفتح آفاقًا جديدة.",
+    pi_tag: "شجرة المعرفة تدعوك لتجربة الفلسفة بشكل تفاعلي.",
+    pi_hint: "انقر أو انتظر للبدء",
     gx_close_title: "إغلاق المجرة (ESC)",
     gx_title: "مجرة المعرفة · 51 فيلسوفًا مجمّعين حسب الحقبة",
     gx_search_placeholder: "⌕ ابحث عن فيلسوف…",
     gx_hint_1: "اسحب للتحريك", gx_hint_2: "مرّر للتكبير",
-    gx_cluster_header: "عناقيد نجمية"
+    gx_cluster_header: "عناقيد نجمية",
+    cmp_title: "مقارنة", cmp_reset: "إعادة", cmp_close_title: "إغلاق",
+    cmp_empty_hint: "اختر فيلسوفين لمقارنتهما مستوى بمستوى.",
+    cmp_change: "تغيير", cmp_choose_a: "اختر الفيلسوف أ…", cmp_choose_b: "اختر الفيلسوف ب…",
+    cmp_no_matches: "لا نتائج",
+    cmp_influenced: "أثّر {a} في {b}",
+    cmp_same_era: "كلاهما ينتمي إلى حقبة «{era}»",
+    cmp_years_apart: "{n} سنة تفصل بين مولديهما",
+    cmp_row_name: "الاسم", cmp_row_era: "الحقبة", cmp_row_life: "التواريخ",
+    cmp_row_quote: "اقتباس", cmp_row_ideas: "أفكار", cmp_row_works: "أعمال"
   }
 };
 
@@ -1178,9 +1262,28 @@ const ERA_I18N = {
     'Sozialphil.':'فلسفة اجتماعية','Soziologie':'علم الاجتماع','Südasien':'جنوب آسيا','Utilitarismus':'نفعية',
     'Vorsokratik':'ما قبل سقراط','Willensphil.':'فلسفة الإرادة','Zeitgenössisch':'معاصرة'}
 };
-function phEra(p){
+function eraLabelStr(era){
   const tbl = ERA_I18N[currentLang];
-  return (tbl && tbl[p.era]) || p.era;
+  return (tbl && tbl[era]) || era;
+}
+function phEra(p){
+  return eraLabelStr(p.era);
+}
+function phLife(p){
+  if(currentLang==='en' && p.life_en) return p.life_en;
+  if(currentLang==='ar' && p.life_ar) return p.life_ar;
+  return p.life;
+}
+function formatYear(y){
+  if(currentLang==='ar') return y<0 ? Math.abs(y)+' ق.م' : y+' م';
+  if(currentLang==='en') return y<0 ? Math.abs(y)+' BCE' : y+' CE';
+  return y<0 ? Math.abs(y)+' v.Chr.' : y+' n.Chr.';
+}
+function tpl(key, vars){
+  const d = I18N[currentLang] || I18N.de;
+  let s = d[key] || '';
+  Object.keys(vars||{}).forEach(k=>{ s = s.replace('{'+k+'}', vars[k]); });
+  return s;
 }
 
 function setLanguage(lang){
@@ -1205,6 +1308,9 @@ function setLanguage(lang){
   // 3D-Baum-Labels, Zeitleiste und Suche mit neuer Sprache aktualisieren
   if(typeof rebuildLabelSprites==='function') rebuildLabelSprites();
   if(typeof tlBuildMarks==='function') tlBuildMarks();
+  if(typeof tlBuildEraBar==='function') tlBuildEraBar();
+  if(typeof tlTranslateStatic==='function') tlTranslateStatic();
+  if(typeof piBuildKinetic==='function') piBuildKinetic();
   if(typeof fcBuildDeck==='function' && typeof fcDeck!=='undefined') fcBuildDeck();
   const mmOv = document.getElementById('mm-overlay');
   if(mmOv && mmOv.classList.contains('show')){
@@ -1216,6 +1322,11 @@ function setLanguage(lang){
   if(gxOv && gxOv.classList.contains('show')){
     if(typeof gxBuildClusterList==='function') gxBuildClusterList();
     if(typeof gxHideTooltip==='function') gxHideTooltip();
+  }
+  const cmpOv = document.getElementById('cmp-overlay');
+  if(cmpOv && cmpOv.classList.contains('show')){
+    if(typeof renderPickers==='function') renderPickers();
+    if(typeof renderCompare==='function') renderCompare();
   }
   const fcOv = document.getElementById('fc-overlay');
   if(fcOv && fcOv.classList.contains('show')){
@@ -2018,19 +2129,20 @@ function closeCompare(){
 }
 
 function renderPickers(){
+  const d = I18N[currentLang] || I18N.de;
   [0,1].forEach(slot=>{
     const box=document.getElementById('cmp-picker-'+slot);
     const id=compareIds[slot];
     const p=id?PHM[id]:null;
     if(p && cmpDropdownOpenSlot!==slot){
       box.innerHTML = `<div class="cmp-picker-chip" onclick="cmpOpenDropdown(${slot})">
-        <span class="cmp-picker-initial" style="color:${p.c}">${p.name.charAt(0)}</span>
-        <span><span class="cmp-picker-name">${p.name}</span><br/><span class="cmp-picker-sub">ändern</span></span>
+        <span class="cmp-picker-initial" style="color:${p.c}">${phName(p).charAt(0)}</span>
+        <span><span class="cmp-picker-name">${phName(p)}</span><br/><span class="cmp-picker-sub">${d.cmp_change}</span></span>
       </div>`;
     } else {
-      const otherPh = compareIds[1-slot];
+      const placeholder = slot===0 ? d.cmp_choose_a : d.cmp_choose_b;
       box.innerHTML = `<div class="cmp-picker-list">
-        <input class="cmp-picker-input" id="cmp-search-${slot}" placeholder="Philosoph ${slot===0?'A':'B'} wählen…"
+        <input class="cmp-picker-input" id="cmp-search-${slot}" placeholder="${placeholder}"
           oninput="cmpFilterDropdown(${slot}, this.value)" onfocus="cmpOpenDropdown(${slot})"/>
         <div class="cmp-picker-dropdown" id="cmp-dropdown-${slot}" style="display:${cmpDropdownOpenSlot===slot?'block':'none'}"></div>
       </div>`;
@@ -2047,15 +2159,16 @@ function cmpOpenDropdown(slot){
 function cmpFilterDropdown(slot, query){
   const dd=document.getElementById('cmp-dropdown-'+slot);
   if(!dd) return;
+  const d = I18N[currentLang] || I18N.de;
   const q=query.trim().toLowerCase();
   const otherId=compareIds[1-slot];
-  const matches=PH.filter(p=>p.id!==otherId && (!q || p.name.toLowerCase().includes(q))).slice(0,8);
+  const matches=PH.filter(p=>p.id!==otherId && (!q || p.name.toLowerCase().includes(q) || (p.name_ar&&p.name_ar.includes(q)))).slice(0,8);
   dd.style.display='block';
   dd.innerHTML = matches.length===0
-    ? '<div class="cmp-picker-item" style="cursor:default">Keine Treffer</div>'
+    ? '<div class="cmp-picker-item" style="cursor:default">'+d.cmp_no_matches+'</div>'
     : matches.map(p=>`<div class="cmp-picker-item" onclick="setCompareSlot(${slot},'${p.id}')">
         <span class="cpd" style="background:${p.c};box-shadow:0 0 5px ${p.c}"></span>
-        <span>${p.name}</span><span class="cpe">${p.era}</span>
+        <span>${phName(p)}</span><span class="cpe">${phEra(p)}</span>
       </div>`).join('');
 }
 
@@ -2074,24 +2187,25 @@ function renderCompare(){
   const aInfB=(a.inf||[]).includes(b.id);
   const bInfA=(b.inf||[]).includes(a.id);
   if(aInfB||bInfA){
-    rel.innerHTML = '<span style="color:#FFBE78">'+(aInfB? a.name+' beeinflusste '+b.name : b.name+' beeinflusste '+a.name)+'</span>';
+    rel.innerHTML = '<span style="color:#FFBE78">'+(aInfB? tpl('cmp_influenced',{a:phName(a),b:phName(b)}) : tpl('cmp_influenced',{a:phName(b),b:phName(a)}))+'</span>';
   } else if(a.era===b.era){
-    rel.innerHTML = '<span style="color:#7BAE6E">Beide gehören zur Epoche „'+a.era+'"</span>';
+    rel.innerHTML = '<span style="color:#7BAE6E">'+tpl('cmp_same_era',{era:phEra(a)})+'</span>';
   } else {
-    rel.textContent = Math.abs((a.by||0)-(b.by||0))+' Jahre trennen ihre Geburt';
+    rel.textContent = tpl('cmp_years_apart',{n:Math.abs((a.by||0)-(b.by||0))});
   }
+  const d = I18N[currentLang] || I18N.de;
   const row=(label,aHtml,bHtml)=>`<div class="cmp-row">
     <div class="cmp-row-label">${label}</div><div>${aHtml}</div><div>${bHtml}</div>
   </div>`;
   const tags=(p)=>`<div class="cmp-tags">${phIdeas(p).map(i=>`<span class="cmp-tag" style="background:${p.c}1a;color:${p.c};border:1px solid ${p.c}44">${i}</span>`).join('')}</div>`;
   const works=(p)=> p.works&&p.works.length ? p.works.map(w=>`<div class="cmp-work">${w}</div>`).join('') : '<span style="color:#4A5570;font-size:12px">—</span>';
   table.innerHTML =
-    row('Name', `<span class="cmp-row-name" style="color:${a.c}">${phName(a)}</span>`, `<span class="cmp-row-name" style="color:${b.c}">${phName(b)}</span>`) +
-    row('Epoche', phEra(a), phEra(b)) +
-    row('Lebensdaten', `<span style="font-family:monospace;color:#9FC3E8">${a.life}</span>`, `<span style="font-family:monospace;color:#9FC3E8">${b.life}</span>`) +
-    row('Zitat', `<span class="cmp-row-quote">„${phQuote(a)}"</span>`, `<span class="cmp-row-quote">„${phQuote(b)}"</span>`) +
-    row('Ideen', tags(a), tags(b)) +
-    row('Werke', works(a), works(b));
+    row(d.cmp_row_name, `<span class="cmp-row-name" style="color:${a.c}">${phName(a)}</span>`, `<span class="cmp-row-name" style="color:${b.c}">${phName(b)}</span>`) +
+    row(d.cmp_row_era, phEra(a), phEra(b)) +
+    row(d.cmp_row_life, `<span style="font-family:monospace;color:#9FC3E8">${a.life}</span>`, `<span style="font-family:monospace;color:#9FC3E8">${b.life}</span>`) +
+    row(d.cmp_row_quote, `<span class="cmp-row-quote">„${phQuote(a)}"</span>`, `<span class="cmp-row-quote">„${phQuote(b)}"</span>`) +
+    row(d.cmp_row_ideas, tags(a), tags(b)) +
+    row(d.cmp_row_works, works(a), works(b));
 }
 
 document.addEventListener('keydown', e=>{
@@ -2293,8 +2407,7 @@ const tlName=document.getElementById('tl-name');
 tlSlider.addEventListener('pointerdown',()=>{ if(tlPlaying) tlTogglePlay(); });
 tlSlider.addEventListener('input',e=>{
   timelineYear=parseInt(e.target.value);
-  const yr=timelineYear<0?Math.abs(timelineYear)+' v.Chr.':timelineYear+' n.Chr.';
-  tlYear.textContent=yr;
+  tlYear.textContent=formatYear(timelineYear);
   tlHighlightActiveEra(timelineYear);
   document.querySelectorAll('.tl-mark').forEach(el=>{
     el.classList.toggle('tl-mark-future', PHM[el.dataset.id] && (PHM[el.dataset.id].by||0)>timelineYear);
@@ -2302,7 +2415,7 @@ tlSlider.addEventListener('input',e=>{
   // Zeige alle Philosophen bis zu diesem Jahr
   const active=PH.filter(p=>(p.by||0)<=timelineYear);
   const newest=active[active.length-1];
-  tlName.textContent=newest?phName(newest)+' ('+newest.life+')':'';
+  tlName.textContent=newest?phName(newest)+' ('+phLife(newest)+')':'';
   pMeshes.forEach((m,i)=>{
     const born=(PH[i].by||0);
     const inTime=born<=timelineYear;
@@ -2350,10 +2463,18 @@ function tlBuildEraBar(){
   box.innerHTML = TL_ERAS.map((e,i)=>{
     const pct = (e.end-e.start)/(TL_MAX-TL_MIN)*100;
     const narrow = pct < 4.5; // zu schmal für lesbaren Text -> Label ausblenden
+    const label = eraLabelStr(e.era);
     return '<div class="tl-era-seg'+(narrow?' tl-narrow':'')+'" data-idx="'+i+'" style="width:'+pct+'%;background:'+e.c+'55;border-top:2px solid '+e.c+'" '+
-      'onclick="tlJumpToEra('+i+')" title="'+e.era+' ('+(e.start<0?Math.abs(e.start)+' v.Chr.':e.start)+' – '+(e.end<0?Math.abs(e.end)+' v.Chr.':e.end)+')">'+
-      '<span class="tl-era-label" style="color:'+e.c+'">'+e.era+'</span></div>';
+      'onclick="tlJumpToEra('+i+')" title="'+label+' ('+formatYear(e.start)+' – '+formatYear(e.end)+')">'+
+      '<span class="tl-era-label" style="color:'+e.c+'">'+label+'</span></div>';
   }).join('');
+}
+function tlTranslateStatic(){
+  const minLbl = document.getElementById('tl-min-label');
+  const maxLbl = document.getElementById('tl-max-label');
+  if(minLbl) minLbl.textContent = formatYear(TL_MIN);
+  if(maxLbl) maxLbl.textContent = TL_MAX+'';
+  if(tlYear) tlYear.textContent = formatYear(timelineYear);
 }
 tlBuildEraBar(); // Epochen sofort sichtbar, nicht erst nach dem Öffnen
 
@@ -2367,7 +2488,7 @@ function tlBuildMarks(){
     const yr=p.by||0;
     const pct=((yr-TL_MIN)/(TL_MAX-TL_MIN))*100;
     return `<div class="tl-mark" data-id="${p.id}" style="left:${pct}%;background:${p.c};box-shadow:0 0 5px ${p.c}"
-      title="${phName(p)} (${p.life})" onclick="event.stopPropagation();tlJumpToYear(${yr});flyToById('${p.id}')"></div>`;
+      title="${phName(p)} (${phLife(p)})" onclick="event.stopPropagation();tlJumpToYear(${yr});flyToById('${p.id}')"></div>`;
   }).join('');
 }
 tlBuildMarks();
@@ -2419,7 +2540,7 @@ function toggleTimeline(){
   if(tlOpen){
     tlBuildEraBar();
     // Alle sichtbar machen bis aktuelles Jahr
-    tlSlider.value='-600'; timelineYear=-600; tlYear.textContent='600 v.Chr.';
+    tlSlider.value='-600'; timelineYear=-600; tlYear.textContent=formatYear(-600);
     tlName.textContent='';
     tlHighlightActiveEra(-600);
     document.querySelectorAll('.tl-mark').forEach(el=>el.classList.add('tl-mark-future'));
@@ -4524,6 +4645,21 @@ document.addEventListener('keydown', e=>{
 
 // ─── PHILOSOPHIE-INTRO ────────────────────────────────────────────────────────
 // Zeigt die Vision des Projekts einmal pro Sitzung, bevor der Baum erscheint.
+const PI_MAIN_TEXT = {
+  de: 'Wissen ist kein Ziel,<br/>sondern eine Reise.',
+  en: 'Knowledge is not a goal,<br/>but a journey.',
+  ar: 'المعرفة ليست هدفًا،<br/>بل رحلة.'
+};
+function piBuildKinetic(){
+  const el = document.getElementById('pi-main-text');
+  if(!el) return;
+  const raw = PI_MAIN_TEXT[currentLang] || PI_MAIN_TEXT.de;
+  el.innerHTML = raw.split('<br/>').map((line,li)=>
+    kineticHTML(line, 0.09, li*0.55)
+  ).join('<br/>');
+}
+piBuildKinetic();
+
 (function(){
   const el=document.getElementById('philosophy-intro');
   if(!el) return;
