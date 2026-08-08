@@ -144,55 +144,6 @@ canvas{display:block;position:fixed;inset:0}
 #intro-title p{font-size:13.5px;color:#4A7BA8;letter-spacing:4px;font-family:monospace}
 /* ── Zeitleiste ────────────────────────────────── */
 
-
-
-
-
-
-
-/* ── Suche ─────────────────────────────────────── */
-
-
-
-
-
-
-
-
-/* ── Audio-Button ──────────────────────────────── */
-
-
-/* ── Timeline-Toggle ───────────────────────────── */
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-  
-  
-  
-  
-  
-
-
-
-
-
-
-
-
-
-
-
 #webgl-error{position:fixed;inset:0;background:#03050A;z-index:300;display:none;align-items:center;justify-content:center;flex-direction:column;gap:16px;text-align:center;padding:20px}
 #webgl-error h2{color:#FF6688;font-size:18px}
 #webgl-error p{color:#5C4F70;font-size:11px;max-width:340px;line-height:1.6}
@@ -821,7 +772,6 @@ html[dir="rtl"] #lang-switch{direction:ltr}
     <button class="lang-btn" data-lang="ar" onclick="setLanguage('ar')">AR</button>
   </div>
   <div id="header-tools">
-    <button class="hbtn" id="kg-btn" onclick="openKnowledgeGraph()">🧠 <span class="lbl" data-i18n="nav_wissensgraph">Wissensgraph</span></button>
     <button class="hbtn" id="geo-btn" onclick="openGeoMap()">🗺 <span class="lbl" data-i18n="nav_karte">Karte</span></button>
     <button class="hbtn" id="fc-btn" onclick="openFlashcards()">🎓 <span class="lbl" data-i18n="nav_lernkarten">Lernkarten</span></button>
     <button class="hbtn" id="gx-btn" onclick="openGalaxy()">🌌 <span class="lbl" data-i18n="nav_galaxy">Galaxy</span></button>
@@ -835,7 +785,6 @@ html[dir="rtl"] #lang-switch{direction:ltr}
   <div id="footer-left">
     <button class="hbtn" id="tl-toggle" onclick="toggleTimeline()">⏱ <span class="lbl" data-i18n="footer_zeitleiste">Zeitleiste</span></button>
     <button class="hbtn" id="cmp-toggle" onclick="openCompare()">⚖ <span class="lbl" data-i18n="footer_vergleich">Vergleich</span></button>
-    <button class="hbtn" onclick="discoverRandom()" data-i18n-title="footer_zufall_title" title="Zufälligen Philosophen entdecken (R)">🎲 <span class="lbl" data-i18n="footer_zufall">Zufall</span></button>
     <button class="hbtn" onclick="openSchools()" data-i18n-title="footer_schulen_title" title="Stammbaum der Denkrichtungen">🌿 <span class="lbl" data-i18n="footer_schulen">Schulen</span></button>
   </div>
 
